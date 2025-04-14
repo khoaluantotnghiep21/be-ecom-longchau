@@ -1,3 +1,2 @@
-# be-ecom-longchau
-
-run: run start:dev
+npm install
+run start:dev
