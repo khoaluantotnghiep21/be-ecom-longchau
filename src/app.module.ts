@@ -26,10 +26,11 @@ import { databaseConfig } from './common/database/database.config';
     //AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RequestService,{
-    provide: 'APP_GUARD',
-    useClass: AuthGuard,
-  },
+  providers: [AppService, RequestService,
+  // {
+  //   provide: 'APP_GUARD',
+  //   useClass: AuthGuard,
+  // },
   {
     provide: 'APP_INTERCEPTOR',
     scope: Scope.REQUEST,
