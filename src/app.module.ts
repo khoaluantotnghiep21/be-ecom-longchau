@@ -8,10 +8,14 @@ import { LoggingInterceptor } from './interceptors/logging.interceptors';
 import { FreezePipe } from './pipes/freeze.pipe';
 import { HttpExceptionFilter } from './filters/http-exception.filters';
 import { RolesGuard } from './guards/roles.guard';
-//import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { SanPhamModule } from './Module/SanPham/product.module';
+import { MediaModule } from './Module/Media/media.module';
+import { DanhMucModule } from './Module/DanhMuc/category.module';
+import { RoleModule } from './Module/Role/role.module';
 import { databaseConfig } from './common/database/database.config';
+import { IdentityUserModule } from './Module/IdentityUser/identityuser.module';
 
 @Module({
   imports: [
@@ -23,14 +27,15 @@ import { databaseConfig } from './common/database/database.config';
       useFactory: databaseConfig,
       inject: [ConfigService],
     }),
-    //AuthModule,
+    // Thêm các module khác vào đây
+    SanPhamModule, MediaModule, DanhMucModule, RoleModule, IdentityUserModule
   ],
   controllers: [AppController],
   providers: [AppService, RequestService,
-  // {
-  //   provide: 'APP_GUARD',
-  //   useClass: AuthGuard,
-  // },
+  {
+    provide: 'APP_GUARD',
+    useClass: AuthGuard,
+  },
   {
     provide: 'APP_INTERCEPTOR',
     scope: Scope.REQUEST,
