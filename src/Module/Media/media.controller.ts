@@ -3,7 +3,9 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { MediaService } from './media.service';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from 'src/common/Enum/role.enum';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { UUID } from 'crypto';
+
 
 @ApiBearerAuth('access-token')
 @ApiTags('UploadFile')
@@ -11,12 +13,30 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
-    @Roles(Role.Admin, Role.Employee)
-    @Post('upload/:masanpham')
-    @UseInterceptors(FilesInterceptor('files')) 
-    async uploadMultiple(@Param('masanpham') masanpham: string, @UploadedFiles() files: Express.Multer.File[],) {
-        return this.mediaService.uploadImages(files, masanpham);
-    }
+  @Roles(Role.Admin, Role.Employee)
+  @Post('upload/:idsanpham')
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  async uploadMultiple(
+    @Param('idsanpham') idsanpham: UUID,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.mediaService.uploadImages(files, idsanpham);
+  }
     
     @Roles(Role.Admin)
     @Get('getAllMedia')

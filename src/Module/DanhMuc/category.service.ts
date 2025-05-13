@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/sequelize";
 import { Repository } from "sequelize-typescript";
 import { randomInt } from "crypto";
 import { DanhMuc } from "./category.entity";
+import { CreateCategoryDto } from "./dto/createCategory.dto";
 
 @Injectable()
 export class DanhMucService {
@@ -22,17 +23,18 @@ export class DanhMucService {
         return category;
     }
 
-    async createCategory(tendanhmuc: string): Promise<DanhMuc> {
+    async createCategory(createCategoryDto: CreateCategoryDto): Promise<DanhMuc> {
         const madanhmuc  = 'DM' + randomInt(1000000, 9999999).toString();
-        const data = { tendanhmuc, madanhmuc, soluong:0};
+        const data = { ...createCategoryDto, madanhmuc, soluong:0};
         return await this.danhMucRepo.create(data);
     }
-    async updateCategory(madanhmuc: string, tendanhmuc: string): Promise<DanhMuc> {
+
+    async updateCategory(madanhmuc: string, updateCategoryDto: CreateCategoryDto): Promise<DanhMuc> {
         const category = await this.danhMucRepo.findOne({ where: { madanhmuc } });
         if (!category) {
             throw new Error('Category of Medication not found');
         }
-        category.tendanhmuc = tendanhmuc;
+        category.set(updateCategoryDto)
         return await category.save();
     }
     async deleteCategory(madanhmuc: string) {

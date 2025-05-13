@@ -4,6 +4,7 @@ import { Public } from "src/common/decorator/public.decorator";
 import { Roles } from "src/common/decorator/roles.decorator";
 import { Role } from "src/common/Enum/role.enum";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { CreateCategoryDto } from "./dto/createCategory.dto";
 
 @ApiBearerAuth('access-token')
 @ApiTags('Category')
@@ -26,21 +27,21 @@ export class DanhMucController {
         return category;
     }
 
-    @Roles(Role.Admin, Role.Employee)
+    @Roles(Role.Admin)
     @Post('createCategory')
-    async createCategory(@Body('tendanhmuc') tendanhmuc: string) {
-        const newCategory = await this.danhMucService.createCategory(tendanhmuc);
+    async createCategory(@Body() createCategoryDto: CreateCategoryDto) {
+        const newCategory = await this.danhMucService.createCategory(createCategoryDto);
         return newCategory;
     }
     
-    @Roles(Role.Admin, Role.Employee)
+    @Roles(Role.Admin)
     @Put('updateCategory/:madanhmuc')
-    async updateCategory(@Param('madanhmuc') madanhmuc: string, @Body('tendanhmuc') tendanhmuc: string) {
-        const updatedCategory = await this.danhMucService.updateCategory(madanhmuc, tendanhmuc);
+    async updateCategory(@Param('madanhmuc') madanhmuc: string, @Body() updateCategoryDto: CreateCategoryDto) {
+        const updatedCategory = await this.danhMucService.updateCategory(madanhmuc, updateCategoryDto);
         return updatedCategory;
     }
     
-    @Roles(Role.Admin, Role.Employee)
+    @Roles(Role.Admin)
     @Delete('deleteCategory/:madanhmuc')
     async deleteCategory(@Param('madanhmuc') madanhmuc: string) {
         const deletedCategory = await this.danhMucService.deleteCategory(madanhmuc);

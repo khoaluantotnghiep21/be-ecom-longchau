@@ -17,15 +17,15 @@ export class RolesGuard implements CanActivate {
     }
 
     const { user } = context.switchToHttp().getRequest();
-    if (!user || !user.role) {
+    if (!user || !user.roles) {
       throw new ForbiddenException('User information not found');
     }
-    const userRoles = [user.role];
 
+    const userRoles = user.roles;
     const hasRole = requiredRoles.some((role) => userRoles.includes(role));
     if (!hasRole) {
       throw new ForbiddenException('Insufficient permissions');
     }
-    return hasRole;
+    return true;
   }
 }

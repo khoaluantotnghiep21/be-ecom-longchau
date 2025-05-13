@@ -1,11 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RequestSuccessInterceptor } from './interceptors/requestSuccess.interceptors';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.useGlobalInterceptors(new RequestSuccessInterceptor())
   const config = new DocumentBuilder()
   .setTitle('API Documentation')
   .setDescription('API Documentation for the project Long Chau Pharmacy')
@@ -37,6 +38,6 @@ async function bootstrap() {
     },
   });
   SwaggerModule.setup('api', app, document);
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();

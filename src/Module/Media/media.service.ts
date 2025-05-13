@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { UploadApiResponse } from 'cloudinary';
 import { Media } from './media.entity';
 import { SanPham } from '../SanPham/product.entity';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class MediaService {
@@ -23,8 +24,8 @@ export class MediaService {
     });
   }
 
-  async uploadImages(files: Express.Multer.File[], masanpham: string): Promise<Media[]> {
-    const productExists = await this.sanPhamModel.findOne({ where: { masanpham } });
+  async uploadImages(files: Express.Multer.File[], idsanpham: UUID): Promise<Media[]> {
+    const productExists = await this.sanPhamModel.findOne({ where: { id: idsanpham } });
     if (!productExists) {
       throw new Error('Sản phẩm không tồn tại');
     }
@@ -42,7 +43,7 @@ export class MediaService {
   
     const createdMedias = await this.mediaModel.bulkCreate(
       uploadResults.map((result, index) => ({
-        masanpham,
+        idsanpham,
         url: result.secure_url,
         type: files[index].mimetype,
         size: files[index].size,

@@ -7,6 +7,9 @@ import { CreateProductDto } from './dto/createProduct.dto';
 import { slugify } from 'src/common/Utils/slugify';
 import { UpdateProductDto } from './dto/updateProduct.dto';
 import { DanhMuc } from '../DanhMuc/category.entity';
+import { ThuongHieu } from '../ThuongHieu/thuonghieu.entity';
+import { ChuongTrinhKhuyenMai } from '../ChuongTrinh/promotion.entity';
+import { Media } from '../Media/media.entity';
 
 
 @Injectable()
@@ -37,8 +40,29 @@ export class SanPhamService {
   }
 
   async findAllProduct(): Promise<SanPham[]> {
-      return this.sanPhamModel.findAll();
+    return this.sanPhamModel.findAll({
+      include: [
+        {
+          model: DanhMuc,
+          attributes: ['tendanhmuc'],
+        },
+        {
+          model: ThuongHieu,
+          attributes: ['tenthuonghieu'],
+        },
+        {
+          model: ChuongTrinhKhuyenMai,
+          attributes: ['tenchuongtrinh'],
+        },
+        {
+          model: Media,
+          attributes: ['url'],
+          
+        },
+      ],
+    });
   }
+  
 
   async findOneProduct(masanpham: string): Promise<SanPham> {
       const product = await this.sanPhamModel.findOne({ where: { masanpham } });

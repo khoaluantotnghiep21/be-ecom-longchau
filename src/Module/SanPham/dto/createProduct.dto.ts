@@ -4,8 +4,6 @@ export class CreateProductDto {
     @ApiProperty()
     tensanpham: string;
     @ApiProperty()
-    slug: string;
-    @ApiProperty()
     dangbaoche: string;
     @ApiProperty()
     congdung: string;
@@ -14,7 +12,7 @@ export class CreateProductDto {
     @ApiProperty()
     chongchidinh: string;
     @ApiProperty()
-    thuockedon: string;
+    thuockedon: boolean;
     @ApiProperty()
     motangan: string;
     @ApiProperty()

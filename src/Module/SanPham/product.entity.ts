@@ -1,6 +1,9 @@
 import { DataTypes } from "sequelize";
-import { BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { BelongsTo, Column, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { DanhMuc } from "../DanhMuc/category.entity";
+import { ThuongHieu } from "../ThuongHieu/thuonghieu.entity";
+import { ChuongTrinhKhuyenMai } from "../ChuongTrinh/promotion.entity";
+import { Media } from "../Media/media.entity";
 
 @Table({ tableName: "sanpham", timestamps: false })
 export class SanPham extends Model<SanPham> {
@@ -30,7 +33,7 @@ export class SanPham extends Model<SanPham> {
   chongchidinh: string;
 
   @Column
-  thuockedon: string;
+  thuockedon: boolean;
 
   @Column
   motangan: string;
@@ -51,6 +54,7 @@ export class SanPham extends Model<SanPham> {
   gianhap: number;
 
   @Column
+  @ForeignKey(() => ThuongHieu)
   mathuonghieu: string;
 
   @Column
@@ -58,8 +62,18 @@ export class SanPham extends Model<SanPham> {
   madanhmuc: string;
 
   @Column
+  @ForeignKey(() => ChuongTrinhKhuyenMai)
   machuongtrinh: string;
 
   @BelongsTo(() => DanhMuc)
   danhmuc: DanhMuc;
+
+  @BelongsTo(() => ThuongHieu)
+  thuonghieu: ThuongHieu;
+
+  @BelongsTo(() => ChuongTrinhKhuyenMai)
+  khuyenmai: ChuongTrinhKhuyenMai;
+
+  @HasMany(() => Media)
+  anhsanpham: Media[]
 }

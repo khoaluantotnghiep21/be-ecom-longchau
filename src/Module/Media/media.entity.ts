@@ -10,7 +10,7 @@ export class Media extends Model{
 
     @ForeignKey(() => SanPham)
     @Column({ type: DataTypes.STRING })
-    masanpham: string;
+    idsanpham: string;
 
     @Column
     url: string;
