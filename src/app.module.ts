@@ -16,6 +16,7 @@ import { DanhMucModule } from './Module/DanhMuc/category.module';
 import { RoleModule } from './Module/Role/role.module';
 import { databaseConfig } from './common/database/database.config';
 import { IdentityUserModule } from './Module/IdentityUser/identityuser.module';
+import { ThuongHieuModule } from './Module/ThuongHieu/thuonghieu.module';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { IdentityUserModule } from './Module/IdentityUser/identityuser.module';
       inject: [ConfigService],
     }),
     // Thêm các module khác vào đây
-    SanPhamModule, MediaModule, DanhMucModule, RoleModule, IdentityUserModule
+    SanPhamModule, MediaModule, DanhMucModule, RoleModule, IdentityUserModule, ThuongHieuModule
   ],
   controllers: [AppController],
   providers: [AppService, RequestService,
