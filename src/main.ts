@@ -5,6 +5,15 @@ import { RequestSuccessInterceptor } from './interceptors/requestSuccess.interce
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: true, // Allow all origins
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  });
+  
   app.useGlobalInterceptors(new RequestSuccessInterceptor());
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
