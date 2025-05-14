@@ -1,6 +1,11 @@
-import { Body, Controller, Get, InternalServerErrorException, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Post,
+} from '@nestjs/common';
 import { AppService } from './app.service';
-
 
 @Controller()
 export class AppController {
@@ -13,6 +18,7 @@ export class AppController {
 
   @Post()
   examplePost(@Body() body: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     body.test = 32;
   }
 

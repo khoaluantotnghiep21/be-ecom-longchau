@@ -24,7 +24,7 @@ import { UnitDetalsModule } from './Module/ChiTietDonViTinh/chitietdonvitinh.mod
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, 
+      isGlobal: true,
     }),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
@@ -43,34 +43,43 @@ import { UnitDetalsModule } from './Module/ChiTietDonViTinh/chitietdonvitinh.mod
       }),
     }),
     // Thêm các module khác vào đây
-    SanPhamModule, MediaModule, DanhMucModule, RoleModule, IdentityUserModule, 
-    ThuongHieuModule, UnitModule, UnitDetalsModule
+    SanPhamModule,
+    MediaModule,
+    DanhMucModule,
+    RoleModule,
+    IdentityUserModule,
+    ThuongHieuModule,
+    UnitModule,
+    UnitDetalsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RequestService,
-  {
-    provide: 'APP_GUARD',
-    useClass: AuthGuard,
-  },
-  {
-    provide: 'APP_INTERCEPTOR',
-    scope: Scope.REQUEST,
-    useClass: LoggingInterceptor,
-  },
-  {
-    provide: 'APP_PIPE',
-    useClass: FreezePipe
-  },
-  {
-    provide: 'APP_FILTER',
-    useClass: HttpExceptionFilter,
-  },
-  {
-    provide: 'APP_GUARD',
-    useClass: RolesGuard,
-  }],
+  providers: [
+    AppService,
+    RequestService,
+    {
+      provide: 'APP_GUARD',
+      useClass: AuthGuard,
+    },
+    {
+      provide: 'APP_INTERCEPTOR',
+      scope: Scope.REQUEST,
+      useClass: LoggingInterceptor,
+    },
+    {
+      provide: 'APP_PIPE',
+      useClass: FreezePipe,
+    },
+    {
+      provide: 'APP_FILTER',
+      useClass: HttpExceptionFilter,
+    },
+    {
+      provide: 'APP_GUARD',
+      useClass: RolesGuard,
+    },
+  ],
 })
-export class AppModule implements NestModule{
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthenticationMiddleware).forRoutes('*');
   }
