@@ -22,8 +22,9 @@ export class IdentityUserController {
   @Public()
   @Post('signIn')
   async signIn(@Body() signInDto: SignInDto) {
-    const accessToken = await this.identityUserService.SignIn(signInDto);
-    return accessToken;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const result = await this.identityUserService.SignIn(signInDto);
+    return result;
   }
 
   @Public()

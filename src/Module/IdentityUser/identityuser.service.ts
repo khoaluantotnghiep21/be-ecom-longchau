@@ -75,7 +75,9 @@ export class IdentityUserService {
     return userRole;
   }
 
-  async SignIn(signInDto: SignInDto): Promise<{ accessToken: string }> {
+  async SignIn(
+    signInDto: SignInDto,
+  ): Promise<{ accessToken: string; roles: string[] }> {
     const user = await this.identityUserRepo.findOne({
       where: { sodienthoai: signInDto.sodienthoai },
     });
@@ -100,13 +102,14 @@ export class IdentityUserService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-    const nameroles = roles.map((role) => role.dataValues.namerole);
+    const nameroles = roles.map((role) => role.dataValues.namerole) as string[];
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const payload = { sub: user.dataValues.id, roles: nameroles };
 
     return {
       accessToken: await this.jwtService.signAsync(payload),
+      roles: nameroles,
     };
   }
 }
