@@ -44,8 +44,14 @@ export class SanPhamService {
     return newProduct;
   }
 
-  async findAllProduct(): Promise<SanPham[]> {
-    return this.sanPhamModel.findAll({
+  async findAllProduct(page?: number, take?: number) {
+    const currentPage = page ? parseInt(page.toString()) : 1;
+    const limit = take ? parseInt(take.toString()) : 10;
+    const offset = (currentPage - 1) * limit;
+
+    const { count, rows } = await this.sanPhamModel.findAndCountAll({
+      limit,
+      offset,
       include: [
         {
           model: DanhMuc,
@@ -64,7 +70,18 @@ export class SanPhamService {
           attributes: ['url'],
         },
       ],
+      distinct: true,
     });
+
+    return {
+      data: rows,
+      meta: {
+        total: count,
+        page: currentPage,
+        take: limit,
+        pageCount: Math.ceil(count / limit),
+      },
+    };
   }
 
   async findOneProductByCategory(madanhmuc: string) {
@@ -134,7 +151,9 @@ export class SanPhamService {
       await oldCategory.save();
 
       // Tăng ở danh mục mới
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const soluongtang = newCategory.dataValues.soluong + 1;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       newCategory.set({ soluong: soluongtang });
       console.log('soluongtang', soluongtang);
 

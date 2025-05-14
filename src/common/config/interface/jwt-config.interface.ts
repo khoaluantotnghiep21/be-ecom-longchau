@@ -1,4 +1,4 @@
 export interface JwtConfig {
-    secret: string;
-    expiresIn: string;
-  }
+  secret: string;
+  expiresIn: string;
+}

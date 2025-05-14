@@ -5,15 +5,19 @@ import { RequestSuccessInterceptor } from './interceptors/requestSuccess.interce
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Cấu hình CORS hoàn chỉnh
   app.enableCors({
-    origin: true, // Allow all origins
+    origin: true, // Cho phép tất cả các origin
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders:
+      'Origin,X-Requested-With,Content-Type,Accept,Authorization,Access-Control-Allow-Origin',
+    exposedHeaders: 'Content-Length,Content-Range',
     credentials: true,
-    allowedHeaders: 'Content-Type, Accept, Authorization',
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
-  
+
   app.useGlobalInterceptors(new RequestSuccessInterceptor());
   const config = new DocumentBuilder()
     .setTitle('API Documentation')
@@ -51,4 +55,4 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   await app.listen(process.env.PORT ?? 4000);
 }
-bootstrap();
+void bootstrap();

@@ -52,7 +52,7 @@ import { PromotionModule } from './Module/ChuongTrinh/promotion.module';
     ThuongHieuModule,
     UnitModule,
     UnitDetalsModule,
-    PromotionModule
+    PromotionModule,
   ],
   controllers: [AppController],
   providers: [

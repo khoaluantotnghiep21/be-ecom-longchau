@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SignInDto {
-    @ApiProperty()
-    sodienthoai: string;
-    @ApiProperty()
-    matkhau: string;
+  @ApiProperty()
+  sodienthoai: string;
+  @ApiProperty()
+  matkhau: string;
 }
