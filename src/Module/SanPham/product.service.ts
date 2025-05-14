@@ -8,7 +8,7 @@ import { slugify } from 'src/common/Utils/slugify';
 import { UpdateProductDto } from './dto/updateProduct.dto';
 import { DanhMuc } from '../DanhMuc/category.entity';
 import { ThuongHieu } from '../ThuongHieu/thuonghieu.entity';
-import { ChuongTrinhKhuyenMai } from '../ChuongTrinh/promotion.entity';
+import { Promotion } from '../ChuongTrinh/promotion.entity';
 import { Media } from '../Media/media.entity';
 
 
@@ -51,7 +51,7 @@ export class SanPhamService {
           attributes: ['tenthuonghieu'],
         },
         {
-          model: ChuongTrinhKhuyenMai,
+          model: Promotion,
           attributes: ['tenchuongtrinh'],
         },
         {
@@ -75,7 +75,7 @@ export class SanPhamService {
           attributes: ['tenthuonghieu'],
         },
         {
-          model: ChuongTrinhKhuyenMai,
+          model: Promotion,
           attributes: ['tenchuongtrinh'],
         },
         {

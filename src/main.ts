@@ -26,6 +26,7 @@ async function bootstrap() {
     .addTag('Brand')
     .addTag('Unit')
     .addTag('UnitDetals')
+    .addTag('Promotion')
     .addTag('UploadFile')
     .addTag('Role')
 

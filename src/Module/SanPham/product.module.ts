@@ -6,11 +6,11 @@ import { SanPhamService } from "./product.service";
 import { DanhMuc } from "../DanhMuc/category.entity";
 import { ThuongHieu } from "../ThuongHieu/thuonghieu.entity";
 import { Media } from "../Media/media.entity";
-import { ChuongTrinhKhuyenMai } from "../ChuongTrinh/promotion.entity";
+import { Promotion } from "../ChuongTrinh/promotion.entity";
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([SanPham, DanhMuc, ThuongHieu, Media, ChuongTrinhKhuyenMai]),
+        SequelizeModule.forFeature([SanPham, DanhMuc, ThuongHieu, Media, Promotion]),
     ],
     controllers: [SanPhamController],
     providers: [SanPhamService],

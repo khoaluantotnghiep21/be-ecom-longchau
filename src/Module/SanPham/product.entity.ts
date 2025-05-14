@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { BelongsTo, Column, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { DanhMuc } from "../DanhMuc/category.entity";
 import { ThuongHieu } from "../ThuongHieu/thuonghieu.entity";
-import { ChuongTrinhKhuyenMai } from "../ChuongTrinh/promotion.entity";
+import { Promotion } from "../ChuongTrinh/promotion.entity";
 import { Media } from "../Media/media.entity";
 
 @Table({ tableName: "sanpham", timestamps: false })
@@ -62,7 +62,7 @@ export class SanPham extends Model<SanPham> {
   madanhmuc: string;
 
   @Column
-  @ForeignKey(() => ChuongTrinhKhuyenMai)
+  @ForeignKey(() => Promotion)
   machuongtrinh: string;
 
   @BelongsTo(() => DanhMuc)
@@ -71,8 +71,8 @@ export class SanPham extends Model<SanPham> {
   @BelongsTo(() => ThuongHieu)
   thuonghieu: ThuongHieu;
 
-  @BelongsTo(() => ChuongTrinhKhuyenMai)
-  khuyenmai: ChuongTrinhKhuyenMai;
+  @BelongsTo(() => Promotion)
+  khuyenmai: Promotion;
 
   @HasMany(() => Media)
   anhsanpham: Media[]
