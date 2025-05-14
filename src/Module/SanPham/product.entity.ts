@@ -70,6 +70,7 @@ export class SanPham extends Model<SanPham> {
   madanhmuc: string;
 
   @Column
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @ForeignKey(() => Promotion)
   machuongtrinh: string;
 
@@ -79,6 +80,7 @@ export class SanPham extends Model<SanPham> {
   @BelongsTo(() => ThuongHieu)
   thuonghieu: ThuongHieu;
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @BelongsTo(() => Promotion)
   khuyenmai: Promotion;
 
