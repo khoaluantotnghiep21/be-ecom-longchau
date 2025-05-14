@@ -17,6 +17,9 @@ import { RoleModule } from './Module/Role/role.module';
 import { databaseConfig } from './common/database/database.config';
 import { IdentityUserModule } from './Module/IdentityUser/identityuser.module';
 import { ThuongHieuModule } from './Module/ThuongHieu/thuonghieu.module';
+import { JwtModule } from '@nestjs/jwt';
+import { UnitModule } from './Module/DonViTinh/donvitinh.module';
+import { UnitDetalsModule } from './Module/ChiTietDonViTinh/chitietdonvitinh.module';
 
 @Module({
   imports: [
@@ -28,8 +31,20 @@ import { ThuongHieuModule } from './Module/ThuongHieu/thuonghieu.module';
       useFactory: databaseConfig,
       inject: [ConfigService],
     }),
+
+    JwtModule.registerAsync({
+      global: true,
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN'),
+        },
+      }),
+    }),
     // Thêm các module khác vào đây
-    SanPhamModule, MediaModule, DanhMucModule, RoleModule, IdentityUserModule, ThuongHieuModule
+    SanPhamModule, MediaModule, DanhMucModule, RoleModule, IdentityUserModule, 
+    ThuongHieuModule, UnitModule, UnitDetalsModule
   ],
   controllers: [AppController],
   providers: [AppService, RequestService,

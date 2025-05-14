@@ -61,10 +61,7 @@ export class IdentityUserService {
         const payload = { sub: user.dataValues.id, roles: nameroles };
     
         return {
-            accessToken: await this.jwtService.signAsync(payload, {
-                secret: process.env.JWT_ACCESS_SECRET,
-                expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
-            }),
+            accessToken: await this.jwtService.signAsync(payload),
         };
     }
 }

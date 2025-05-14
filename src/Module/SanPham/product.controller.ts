@@ -31,6 +31,12 @@ export class SanPhamController {
     return await this.sanPhamService.findOneProduct(masanpham);
   }
 
+  @Public()
+  @Get('findOneProductByCategory/:madanhmuc')
+  async findOneProductByCategory(@Param('madanhmuc') madanhmuc: string){
+    return await this.sanPhamService.findOneProductByCategory(madanhmuc)
+  }
+  
   @Roles(Role.Admin, Role.Employee)
   @Put('updateProduct/:masanpham')
   async updateProduct(@Param('masanpham') masanpham: string, @Body() updateProductDto: CreateProductDto): Promise<SanPham> {

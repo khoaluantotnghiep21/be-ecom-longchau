@@ -63,6 +63,29 @@ export class SanPhamService {
     });
   }
   
+  async findOneProductByCategory(madanhmuc: string){
+    return this.sanPhamModel.findOne({where: {madanhmuc},
+      include: [
+        {
+          model: DanhMuc,
+          attributes: ['tendanhmuc'],
+        },
+        {
+          model: ThuongHieu,
+          attributes: ['tenthuonghieu'],
+        },
+        {
+          model: ChuongTrinhKhuyenMai,
+          attributes: ['tenchuongtrinh'],
+        },
+        {
+          model: Media,
+          attributes: ['url'],
+          
+        },
+      ],
+    })
+  }
 
   async findOneProduct(masanpham: string): Promise<SanPham> {
       const product = await this.sanPhamModel.findOne({ where: { masanpham } });
@@ -119,7 +142,7 @@ export class SanPhamService {
     }
     const danhmuc = await this.danhMucModel.findOne({where:{ madanhmuc: product.dataValues.madanhmuc }});
     if (!danhmuc) {
-      throw new Error('Caterory muc not found');
+      throw new Error('Caterory not found');
     }
     console.log('danhmuc', product.dataValues.madanhmuc);
     const soluonggiam = danhmuc.dataValues.soluong - 1;

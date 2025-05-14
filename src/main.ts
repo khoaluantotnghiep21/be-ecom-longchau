@@ -21,12 +21,16 @@ async function bootstrap() {
     },
     'access-token', 
   )
+  .addTag('IdentityUser')
   .addTag('Product')
   .addTag('Category')
+  .addTag('Brand')
+  .addTag('Unit')
+  .addTag('UnitDetals')
   .addTag('UploadFile')
   .addTag('Role')
-  .addTag('IdentityUser')
-  .addTag('Brand')
+  
+  
 
   .build();
   const document = SwaggerModule.createDocument(app, config);
