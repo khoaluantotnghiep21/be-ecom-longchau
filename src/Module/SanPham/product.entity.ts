@@ -1,11 +1,19 @@
-import { DataTypes } from "sequelize";
-import { BelongsTo, Column, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { DanhMuc } from "../DanhMuc/category.entity";
-import { ThuongHieu } from "../ThuongHieu/thuonghieu.entity";
-import { Promotion } from "../ChuongTrinh/promotion.entity";
-import { Media } from "../Media/media.entity";
+import { DataTypes } from 'sequelize';
+import {
+  BelongsTo,
+  Column,
+  ForeignKey,
+  HasMany,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import { DanhMuc } from '../DanhMuc/category.entity';
+import { ThuongHieu } from '../ThuongHieu/thuonghieu.entity';
+import { Promotion } from '../ChuongTrinh/promotion.entity';
+import { Media } from '../Media/media.entity';
 
-@Table({ tableName: "sanpham", timestamps: false })
+@Table({ tableName: 'sanpham', timestamps: false })
 export class SanPham extends Model<SanPham> {
   @PrimaryKey
   @Column({ type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 })
@@ -75,5 +83,5 @@ export class SanPham extends Model<SanPham> {
   khuyenmai: Promotion;
 
   @HasMany(() => Media)
-  anhsanpham: Media[]
+  anhsanpham: Media[];
 }

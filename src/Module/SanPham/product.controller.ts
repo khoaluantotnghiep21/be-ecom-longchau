@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/createProduct.dto';
 import { SanPhamService } from './product.service';
 import { SanPham } from './product.entity';
@@ -9,7 +17,6 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth('access-token')
 @ApiTags('Product')
-
 @Controller('product')
 export class SanPhamController {
   constructor(private readonly sanPhamService: SanPhamService) {}
@@ -33,19 +40,22 @@ export class SanPhamController {
 
   @Public()
   @Get('findOneProductByCategory/:madanhmuc')
-  async findOneProductByCategory(@Param('madanhmuc') madanhmuc: string){
-    return await this.sanPhamService.findOneProductByCategory(madanhmuc)
+  async findOneProductByCategory(@Param('madanhmuc') madanhmuc: string) {
+    return await this.sanPhamService.findOneProductByCategory(madanhmuc);
   }
-  
+
   @Roles(Role.Admin, Role.Employee)
   @Put('updateProduct/:masanpham')
-  async updateProduct(@Param('masanpham') masanpham: string, @Body() updateProductDto: CreateProductDto): Promise<SanPham> {
+  async updateProduct(
+    @Param('masanpham') masanpham: string,
+    @Body() updateProductDto: CreateProductDto,
+  ): Promise<SanPham> {
     return await this.sanPhamService.updateProduct(masanpham, updateProductDto);
   }
-  
+
   @Roles(Role.Admin, Role.Employee)
   @Delete('deleteProduct/:masanpham')
   async delete(@Param('masanpham') masanpham: string) {
-    return  await this.sanPhamService.deleteProduct(masanpham);
+    return await this.sanPhamService.deleteProduct(masanpham);
   }
 }
