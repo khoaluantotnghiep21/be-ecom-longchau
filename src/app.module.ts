@@ -21,6 +21,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UnitModule } from './Module/DonViTinh/donvitinh.module';
 import { UnitDetalsModule } from './Module/ChiTietDonViTinh/chitietdonvitinh.module';
 import { PromotionModule } from './Module/ChuongTrinh/promotion.module';
+import { LoaiModule } from './Module/Loai/loai.module';
 import { IngredientModule } from './Module/ThanhPhan/ingredient.module';
 import { UserRoleModule } from './Module/UserRole/userrole.module';
 
@@ -56,6 +57,7 @@ import { UserRoleModule } from './Module/UserRole/userrole.module';
     UnitModule,
     UnitDetalsModule,
     PromotionModule,
+    LoaiModule,
     IngredientModule
   ],
   controllers: [AppController],
