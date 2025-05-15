@@ -13,7 +13,7 @@ import { UUID } from 'crypto';
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
-  @Roles(Role.Admin, Role.Employee)
+  @Roles(Role.Admin, Role.Staff)
   @Post('upload/:idsanpham')
   @UseInterceptors(FilesInterceptor('files'))
   @ApiConsumes('multipart/form-data')

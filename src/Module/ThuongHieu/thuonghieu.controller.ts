@@ -26,21 +26,21 @@ export class ThuongHieuController {
         const brand = await this.thuongHieuService.findOne(mathuonghieu);
         return brand;
     }
-    @Roles(Role.Admin, Role.Employee)
+    @Roles(Role.Admin, Role.Staff)
     @Post('createBrand')
     async createBrand(@Body() createBrandDto: CreateBrandDto) {
         const newBrand = await this.thuongHieuService.createBrand(createBrandDto);
         return newBrand;
     }
 
-    @Roles(Role.Admin, Role.Employee)
+    @Roles(Role.Admin, Role.Staff)
     @Put('updateBrand/:mathuonghieu')
     async updateBrand(@Param('mathuonghieu') mathuonghieu: string, @Body() updateBrandDto: CreateBrandDto) {
         const updatedBrand = await this.thuongHieuService.updateBrand(mathuonghieu, updateBrandDto);
         return updatedBrand;
     }
 
-    @Roles(Role.Admin, Role.Employee)
+    @Roles(Role.Admin, Role.Staff)
     @Delete('deleteBrand/:mathuonghieu')
     async deleteBrand(@Param('mathuonghieu') mathuonghieu: string) {
         const deletedBrand = await this.thuongHieuService.deleteBrand(mathuonghieu);

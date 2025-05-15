@@ -24,6 +24,7 @@ import { PromotionModule } from './Module/ChuongTrinh/promotion.module';
 import { LoaiModule } from './Module/Loai/loai.module';
 import { IngredientModule } from './Module/ThanhPhan/ingredient.module';
 import { UserRoleModule } from './Module/UserRole/userrole.module';
+import { IngredientDetalsModule } from './Module/ChiTietThanhPhan/ingredientDetals.module';
 
 @Module({
   imports: [
@@ -58,7 +59,8 @@ import { UserRoleModule } from './Module/UserRole/userrole.module';
     UnitDetalsModule,
     PromotionModule,
     LoaiModule,
-    IngredientModule
+    IngredientModule,
+    IngredientDetalsModule
   ],
   controllers: [AppController],
   providers: [

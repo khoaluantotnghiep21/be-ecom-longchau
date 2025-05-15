@@ -22,7 +22,7 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 export class SanPhamController {
   constructor(private readonly sanPhamService: SanPhamService) {}
 
-  @Roles(Role.Admin, Role.Employee)
+  @Roles(Role.Admin, Role.Staff)
   @Post('createProduct')
   async create(@Body() createProductDto: CreateProductDto): Promise<SanPham> {
     return this.sanPhamService.createNewProduct(createProductDto);
@@ -47,7 +47,7 @@ export class SanPhamController {
     return await this.sanPhamService.findOneProductByCategory(madanhmuc);
   }
 
-  @Roles(Role.Admin, Role.Employee)
+  @Roles(Role.Admin, Role.Staff)
   @Put('updateProduct/:masanpham')
   async updateProduct(
     @Param('masanpham') masanpham: string,
@@ -56,7 +56,7 @@ export class SanPhamController {
     return await this.sanPhamService.updateProduct(masanpham, updateProductDto);
   }
 
-  @Roles(Role.Admin, Role.Employee)
+  @Roles(Role.Admin, Role.Staff)
   @Delete('deleteProduct/:masanpham')
   async delete(@Param('masanpham') masanpham: string) {
     return await this.sanPhamService.deleteProduct(masanpham);
