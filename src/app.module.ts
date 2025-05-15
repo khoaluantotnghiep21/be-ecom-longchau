@@ -21,6 +21,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UnitModule } from './Module/DonViTinh/donvitinh.module';
 import { UnitDetalsModule } from './Module/ChiTietDonViTinh/chitietdonvitinh.module';
 import { PromotionModule } from './Module/ChuongTrinh/promotion.module';
+import { LoaiModule } from './Module/Loai/loai.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { PromotionModule } from './Module/ChuongTrinh/promotion.module';
     UnitModule,
     UnitDetalsModule,
     PromotionModule,
+    LoaiModule,
   ],
   controllers: [AppController],
   providers: [
