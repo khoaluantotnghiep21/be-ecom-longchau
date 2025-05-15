@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { UserRole } from "./userrole.entity";
-import { Repository } from "sequelize-typescript";
-import { UUID } from "crypto";
+import { Repository, Sequelize } from "sequelize-typescript";
 import { Role } from "../Role/role.entity";
-import { Sequelize } from "sequelize";
+import { UserRoleDto } from "./dto/userrole.dto";
+import { UUID } from "crypto";
+import { QueryTypes } from "sequelize";
 
 @Injectable()
 export class UserRoleService {
@@ -13,18 +14,18 @@ export class UserRoleService {
         private readonly identityUserRepo: Repository<UserRole>,
         @InjectModel(Role)
         private readonly roleRepo: Repository<Role>,
-        private readonly sequelize: Sequelize,
+        private readonly sequelize: Sequelize
     ) {}
-    async createUserRole(userid: UUID, roleid: UUID): Promise<UserRole> {
-        const role = await this.roleRepo.findOne({ where: { id: roleid } });
+    async createUserRole(userroleDto: UserRoleDto): Promise<UserRole> {
+        const role = await this.roleRepo.findOne({ where: { id: userroleDto.roleid} });
         if (!role) {
             throw new Error('Role not found');
         }
-        const data = { userid, roleid };
+        const data = {...userroleDto };
         return await this.identityUserRepo.create(data);
     }
 
-    async updateUserRole(userid: UUID, roleid: UUID): Promise<UserRole> {
+    async updateUserRole( userid: UUID, roleid: UUID): Promise<UserRole> {
         const userRole = await this.identityUserRepo.findOne({ where: { userid } });
         if (!userRole) {
             throw new Error('UserRole not found');
@@ -37,22 +38,22 @@ export class UserRoleService {
         return await userRole.save();
     }
     
-    async findUserByRoleId(roleid: UUID): Promise<UserRole[]> {
-        const [result] = await this.sequelize.query(
+    async getAllRolesByUserId(userid: string): Promise<{ role: Role; hoten: string }[]> {
+        const roles = await this.sequelize.query(
             `
-            SELECT 
-            i.id AS user_id,
-            i.hoten ,
-            i.email,
-            i.sodienthoai,
-            r.namerole
-            FROM userrole ur, identityuser i, role r
-            WHERE ur.userid = i.id
-            AND ur.roleid = r.id
-            and ur.userid = '${roleid}';
-            `
-
-        )
-        return result as UserRole[];
+            SELECT r.*, s.hoten
+            FROM userrole ur
+            JOIN role r ON ur.roleid = r.id
+            JOIN identityuser s ON ur.userid = s.id
+            WHERE ur.userid = :userid
+            `,
+            {
+                replacements: { userid },
+                type: QueryTypes.SELECT,
+            }
+        );
+    
+        return roles as { role: Role; hoten: string }[];
     }
+      
 }

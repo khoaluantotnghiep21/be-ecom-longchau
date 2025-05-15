@@ -21,6 +21,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { UnitModule } from './Module/DonViTinh/donvitinh.module';
 import { UnitDetalsModule } from './Module/ChiTietDonViTinh/chitietdonvitinh.module';
 import { PromotionModule } from './Module/ChuongTrinh/promotion.module';
+import { IngredientModule } from './Module/ThanhPhan/ingredient.module';
+import { UserRoleModule } from './Module/UserRole/userrole.module';
 
 @Module({
   imports: [
@@ -48,11 +50,13 @@ import { PromotionModule } from './Module/ChuongTrinh/promotion.module';
     MediaModule,
     DanhMucModule,
     RoleModule,
+    UserRoleModule,
     IdentityUserModule,
     ThuongHieuModule,
     UnitModule,
     UnitDetalsModule,
     PromotionModule,
+    IngredientModule
   ],
   controllers: [AppController],
   providers: [

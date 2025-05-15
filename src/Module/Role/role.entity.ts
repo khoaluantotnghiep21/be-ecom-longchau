@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
-import { Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { Column, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { UserRole } from "../UserRole/userrole.entity";
 
 @Table({ tableName: "role", timestamps: false })
 export class Role extends Model{
@@ -9,4 +10,7 @@ export class Role extends Model{
 
     @Column
     namerole: string;
+
+    @HasMany(() => UserRole)
+    userroles: UserRole[];
 }

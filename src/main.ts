@@ -39,10 +39,11 @@ async function bootstrap() {
     .addTag('Brand')
     .addTag('Unit')
     .addTag('UnitDetals')
+    .addTag('Ingredient')
     .addTag('Promotion')
     .addTag('UploadFile')
     .addTag('Role')
-
+    .addTag('UserRole')
     .build();
   const document = SwaggerModule.createDocument(app, config);
 
