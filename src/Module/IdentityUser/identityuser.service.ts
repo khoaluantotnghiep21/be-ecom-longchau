@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { IdentityUser } from './identityuser.entity';
 import { Repository } from 'sequelize-typescript';
@@ -84,7 +84,11 @@ export class IdentityUserService {
     if (!user) {
       throw new Error('Not found user');
     }
-
+    const password = user.dataValues.matkhau;
+    const isPasswordValid = await bcrypt.compare(signInDto.matkhau, password)
+    if(!isPasswordValid){
+      throw new NotFoundException('Account information not found')
+    }
     const userRoles = await this.userRoleRepo.findAll({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       where: { userid: user.dataValues.id },
