@@ -109,7 +109,7 @@ export class IdentityUserService {
     const nameroles = roles.map((role) => role.dataValues.namerole) as string[];
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const payload = { sub: user.dataValues.id, nameuser: user.dataValues.hoten ,roles: nameroles };
+    const payload = { sub: user.dataValues.id, numberPhone:user.dataValues.sodienthoai, nameuser: user.dataValues.hoten ,roles: nameroles };
 
     return {
       accessToken: await this.jwtService.signAsync(payload),
