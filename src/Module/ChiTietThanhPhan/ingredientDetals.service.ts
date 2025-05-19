@@ -18,23 +18,23 @@ export class IngredientDetalsService{
         private readonly ingredientRepo: Repository<Ingredient>
     ){}
 
-    async addIngredientDetalsForProduct(masanpham: string, madonvitinh: string, ingredientDetailsDto: IngredientDetailsDto): Promise<boolean>{
+    async addIngredientDetalsForProduct(masanpham: string, mathanhphan: string, ingredientDetailsDto: IngredientDetailsDto): Promise<boolean>{
         const product = await this.productRepo.findOne({where: {masanpham}})
-        const ingredient = await this.ingredientRepo.findOne({where: {madonvitinh}})
+        const ingredient = await this.ingredientRepo.findOne({where: {mathanhphan}})
         if(!product){
             throw new NotAcceptableException('Not found product')
         }
         if(!ingredient){
             throw new NotFoundException('Not found ingredient')
         }
-        const data = {masanpham, madonvitinh, ...ingredientDetailsDto}
+        const data = {masanpham, mathanhphan, ...ingredientDetailsDto}
         await this.ingredientDetalsRepo.create(data)
         return true
     }
 
-    async updateIngredientDetalsForProduct(masanpham: string, madonvitinh: string, updateIngredientDetailsDto: UpdateIngredientDetailsDto): Promise<boolean>{
+    async updateIngredientDetalsForProduct(masanpham: string, mathanhphan: string, updateIngredientDetailsDto: UpdateIngredientDetailsDto): Promise<boolean>{
         
-        const ingredientDetals = await this.ingredientDetalsRepo.findOne({where:{masanpham, madonvitinh}})
+        const ingredientDetals = await this.ingredientDetalsRepo.findOne({where:{masanpham, mathanhphan}})
         if(!ingredientDetals){
             throw new NotAcceptableException('Not found Ingredient Details')
         }

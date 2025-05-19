@@ -12,6 +12,8 @@ import { DanhMuc } from '../DanhMuc/category.entity';
 import { ThuongHieu } from '../ThuongHieu/thuonghieu.entity';
 import { Promotion } from '../ChuongTrinh/promotion.entity';
 import { Media } from '../Media/media.entity';
+import { UnitDetals } from '../ChiTietDonViTinh/chitietdonvitinh.entity';
+import { IngredientDetals } from '../ChiTietThanhPhan/ingredientDetals.entity';
 
 @Table({ tableName: 'sanpham', timestamps: false })
 export class SanPham extends Model<SanPham> {
@@ -86,4 +88,16 @@ export class SanPham extends Model<SanPham> {
 
   @HasMany(() => Media)
   anhsanpham: Media[];
+ 
+  @HasMany(() => UnitDetals, {
+    sourceKey: 'masanpham', 
+    foreignKey: 'masanpham'  
+  })
+  chitietdonvi: UnitDetals[];
+
+  @HasMany(() =>IngredientDetals,{
+    sourceKey: 'masanpham',
+    foreignKey: 'masanpham'
+  })
+  chitietthanhphan: IngredientDetals[];
 }

@@ -11,6 +11,10 @@ import { DanhMuc } from '../DanhMuc/category.entity';
 import { ThuongHieu } from '../ThuongHieu/thuonghieu.entity';
 import { Promotion } from '../ChuongTrinh/promotion.entity';
 import { Media } from '../Media/media.entity';
+import { Unit } from '../DonViTinh/donvitinh.entity';
+import { UnitDetals } from '../ChiTietDonViTinh/chitietdonvitinh.entity';
+import { IngredientDetals } from '../ChiTietThanhPhan/ingredientDetals.entity';
+import { Ingredient } from '../ThanhPhan/ingredient.entity';
 
 @Injectable()
 export class SanPhamService {
@@ -69,6 +73,22 @@ export class SanPhamService {
           model: Media,
           attributes: ['url'],
         },
+        {
+          model: UnitDetals,
+          attributes: ['dinhluong', 'giaban'],
+          include: [{
+            model: Unit,
+            attributes: ['donvitinh']
+          }]
+        }, 
+        {
+          model: IngredientDetals,
+          attributes: ['hamluong'],
+          include:[{
+            model: Ingredient,
+            attributes: ['tenthanhphan']
+          }]
+        }
       ],
       distinct: true,
     });
@@ -85,7 +105,7 @@ export class SanPhamService {
   }
 
   async findOneProductByCategory(madanhmuc: string) {
-    return this.sanPhamModel.findOne({
+    return this.sanPhamModel.findAll({
       where: { madanhmuc },
       include: [
         {
@@ -104,12 +124,64 @@ export class SanPhamService {
           model: Media,
           attributes: ['url'],
         },
+        {
+          model: UnitDetals,
+          attributes: ['dinhluong', 'giaban'],
+          include: [{
+            model: Unit,
+            attributes: ['donvitinh']
+          }]
+        }, 
+        {
+          model: IngredientDetals,
+          attributes: ['hamluong'],
+          include:[{
+            model: Ingredient,
+            attributes: ['tenthanhphan']
+          }]
+        }
       ],
     });
   }
 
   async findOneProduct(masanpham: string): Promise<SanPham> {
-    const product = await this.sanPhamModel.findOne({ where: { masanpham } });
+    const product = await this.sanPhamModel.findOne({ where: { masanpham },
+    include: [
+        {
+          model: DanhMuc,
+          attributes: ['tendanhmuc'],
+        },
+        {
+          model: ThuongHieu,
+          attributes: ['tenthuonghieu'],
+        },
+        {
+          model: Promotion,
+          attributes: ['tenchuongtrinh'],
+        },
+        {
+          model: Media,
+          attributes: ['url'],
+        },
+        {
+          model: UnitDetals,
+          as: 'chitietdonvi',
+          attributes: ['dinhluong', 'giaban'],
+          include: [{
+            model: Unit,
+            attributes: ['donvitinh']
+          }]
+        },
+        {
+          model: IngredientDetals,
+          attributes: ['hamluong'],
+          include:[{
+            model: Ingredient,
+            attributes: ['tenthanhphan']
+          }]
+        }
+      ] 
+    });
     if (!product) {
       throw new Error('Product not found');
     }

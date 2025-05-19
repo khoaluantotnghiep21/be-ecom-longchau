@@ -8,11 +8,6 @@ export class UpdateIngredientDetailsDto{
 
     @ApiProperty()
     @IsInt()
-    dinhluong: number;
-
-    @ApiProperty()
-    @IsInt()
-    giaban: number;
-
+    hamluong: number;
 
 }
