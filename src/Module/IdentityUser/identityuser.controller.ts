@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { IdentityUserService } from './identityuser.service';
 import { Public } from 'src/common/decorator/public.decorator';
 import { SignInDto } from './dto/signIn.dto';
@@ -56,7 +56,7 @@ export class IdentityUserController {
   }
 
   @Public()
-  @Post('updateUser/:sodienthoai')
+  @Put('updateUser/:sodienthoai')
   async updateUser(@Param('sodienthoai') sodienthoai: string, @Body() updateUserDto: UpdateIdentityUserDto) {
     const user = await this.identityUserService.updateUser(updateUserDto, sodienthoai);
     return user;
