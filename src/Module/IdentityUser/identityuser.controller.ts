@@ -4,6 +4,7 @@ import { Public } from 'src/common/decorator/public.decorator';
 import { SignInDto } from './dto/signIn.dto';
 import { CreateAccountDto } from './dto/createAccount.dto';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { UpdateIdentityUserDto } from './dto/updateIdentityUser.dto';
 
 @ApiBearerAuth('access-token')
 @ApiTags('IdentityUser')
@@ -52,5 +53,12 @@ export class IdentityUserController {
     const exists =
       await this.identityUserService.isPhoneNumberExist(phoneNumber);
     return { exists };
+  }
+
+  @Public()
+  @Post('updateUser/:sodienthoai')
+  async updateUser(@Param('sodienthoai') sodienthoai: string, @Body() updateUserDto: UpdateIdentityUserDto) {
+    const user = await this.identityUserService.updateUser(updateUserDto, sodienthoai);
+    return user;
   }
 }

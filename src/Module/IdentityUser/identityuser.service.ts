@@ -8,6 +8,7 @@ import { SignInDto } from './dto/signIn.dto';
 import { JwtService } from '@nestjs/jwt';
 import { CreateAccountDto } from './dto/createAccount.dto';
 import * as bcrypt from 'bcrypt';
+import { UpdateIdentityUserDto } from './dto/updateIdentityUser.dto';
 @Injectable()
 export class IdentityUserService {
   constructor(
@@ -115,5 +116,16 @@ export class IdentityUserService {
       accessToken: await this.jwtService.signAsync(payload),
       roles: nameroles,
     };
+  }
+
+  async updateUser(updateUserDto: UpdateIdentityUserDto, sodienthoai: string): Promise<IdentityUser> {
+    const user = await this.identityUserRepo.findOne({
+      where: { sodienthoai },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.set(updateUserDto);
+    return await user.save();
   }
 }
