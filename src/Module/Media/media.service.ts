@@ -47,6 +47,7 @@ export class MediaService {
         url: result.secure_url,
         type: files[index].mimetype,
         size: files[index].size,
+        ismain: index === 0
       }))
     );
   

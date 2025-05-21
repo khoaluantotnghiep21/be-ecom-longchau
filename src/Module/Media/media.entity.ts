@@ -30,4 +30,7 @@ export class Media extends Model {
 
   @Column
   size: number;
+
+  @Column
+  ismain: boolean
 }
