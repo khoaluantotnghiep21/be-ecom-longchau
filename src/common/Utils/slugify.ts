@@ -1,20 +1,21 @@
 export function slugify(text: string): string {
- 
-  const vietnameseMap: Record<string, string> = {
-    'đ': 'd', 'Đ': 'd'
-  };
-  
-  let result = text;
-  for (const [vietnameseChar, latinChar] of Object.entries(vietnameseMap)) {
-    result = result.replace(new RegExp(vietnameseChar, 'g'), latinChar);
+  if (!text) {
+    return '';
   }
   
-  return result
-    .toLowerCase()                             
-    .normalize('NFD')                         
-    .replace(/[\u0300-\u036f]/g, '')           
-    .replace(/[^a-z0-9\s-]/g, '')             
-    .trim()                                   
-    .replace(/\s+/g, '-')                     
-    .replace(/-+/g, '-');                     
+  text = text
+    .toLowerCase()
+    .trim()
+    .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+    .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+    .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+    .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+    .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+    .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+    
+  return text;
 }

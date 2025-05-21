@@ -23,29 +23,40 @@ export class DanhMucController {
   @Get('getAllCategories')
   async getAllCategories() {
     const categories = await this.danhMucService.findAll();
-    return categories;
+    return {
+      data: categories,
+      message: 'Get all categories successfully'
+    };
   }
 
   @Public()
   @Get('findCategory/:madanhmuc')
   async getCategoryById(@Param('madanhmuc') madanhmuc: string) {
     const category = await this.danhMucService.findOne(madanhmuc);
-    return category;
+    return {
+      data: category,
+      message: 'Get category successfully'
+    };
   }
 
   @Public()
   @Get('getDanhMucByLoai/:maloai')
   async getDanhMucByLoai(@Param('maloai') maloai: string) {
     const categories = await this.danhMucService.getDanhMucByLoai(maloai);
-    return categories;
+    return {
+      data: categories,
+      message: 'Get categories by loai successfully'
+    };
   }
 
   @Roles(Role.Admin)
   @Post('createCategory')
   async createCategory(@Body() createCategoryDto: CreateCategoryDto) {
-    const newCategory =
-      await this.danhMucService.createCategory(createCategoryDto);
-    return newCategory;
+    const newCategory = await this.danhMucService.createCategory(createCategoryDto);
+    return {
+      data: newCategory,
+      message: 'Create category successfully'
+    };
   }
 
   @Roles(Role.Admin)
@@ -58,13 +69,29 @@ export class DanhMucController {
       madanhmuc,
       updateCategoryDto,
     );
-    return updatedCategory;
+    return {
+      data: updatedCategory,
+      message: 'Update category successfully'
+    };
   }
 
   @Roles(Role.Admin)
   @Delete('deleteCategory/:madanhmuc')
   async deleteCategory(@Param('madanhmuc') madanhmuc: string) {
     const deletedCategory = await this.danhMucService.deleteCategory(madanhmuc);
-    return deletedCategory;
+    return {
+      data: deletedCategory,
+      message: 'Delete category successfully'
+    };
+  }
+
+  @Roles(Role.Admin)
+  @Post('updateAllNullSlugs')
+  async updateAllNullSlugs() {
+    const updatedCount = await this.danhMucService.updateAllNullSlugs();
+    return {
+      data: { updatedCount },
+      message: `Updated slugs for ${updatedCount} categories successfully`
+    };
   }
 }

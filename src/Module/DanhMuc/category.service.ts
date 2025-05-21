@@ -16,8 +16,9 @@ export class DanhMucService {
   async findAll(): Promise<DanhMuc[]> {
     const categories = await this.danhMucRepo.findAll();
     
+  
     for (const category of categories) {
-      if (!category.slug) {
+      if (!category.slug && category.tendanhmuc) {
         category.slug = slugify(category.tendanhmuc);
         await category.save();
       }
@@ -32,8 +33,7 @@ export class DanhMucService {
       throw new Error('Category of Medication not found');
     }
     
-
-    if (!category.slug) {
+    if (!category.slug && category.tendanhmuc) {
       category.slug = slugify(category.tendanhmuc);
       await category.save();
     }
@@ -44,9 +44,8 @@ export class DanhMucService {
   async getDanhMucByLoai(maloai: string): Promise<DanhMuc[]> {
     const categories = await this.danhMucRepo.findAll({ where: { maloai } });
     
-    // Kiểm tra và cập nhật slug nếu null
     for (const category of categories) {
-      if (!category.slug) {
+      if (!category.slug && category.tendanhmuc) {
         category.slug = slugify(category.tendanhmuc);
         await category.save();
       }
@@ -83,7 +82,12 @@ export class DanhMucService {
     return await category.destroy();
   }
 
+  /**
+   * Cập nhật tất cả các bản ghi có slug là null
+   * @returns Số lượng bản ghi đã được cập nhật
+   */
   async updateAllNullSlugs(): Promise<number> {
+    // Tìm tất cả các bản ghi có slug là null
     const categoriesWithNullSlug = await this.danhMucRepo.findAll({
       where: {
         slug: null
@@ -92,14 +96,19 @@ export class DanhMucService {
     
     let updatedCount = 0;
     
+    // Cập nhật từng bản ghi
     for (const category of categoriesWithNullSlug) {
-      const slug = slugify(category.tendanhmuc);
-      
-      category.slug = slug;
-      await category.save();
-      updatedCount++;
+      // Tạo slug từ tendanhmuc nếu tendanhmuc có giá trị
+      if (category.tendanhmuc) {
+        const slug = slugify(category.tendanhmuc);
+        
+        // Cập nhật
+        category.slug = slug;
+        await category.save();
+        updatedCount++;
+      }
     }
     
-    return updatedCount; 
+    return updatedCount; // Trả về số lượng bản ghi đã được cập nhật
   }
 }
