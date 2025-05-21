@@ -42,7 +42,7 @@ export class SanPhamController {
   }
 
   @Public()
-  @Get('findOneProductByCategory/:madanhmuc')
+  @Get('findProductsByCategory/:madanhmuc')
   async findOneProductByCategory(@Param('madanhmuc') madanhmuc: string) {
     return await this.sanPhamService.findOneProductByCategory(madanhmuc);
   }
