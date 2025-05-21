@@ -11,4 +11,5 @@ export class ThuongHieu extends Model{
 
     @Column
     mota: string;
+
 }

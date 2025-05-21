@@ -23,10 +23,7 @@ export class DanhMucController {
   @Get('getAllCategories')
   async getAllCategories() {
     const categories = await this.danhMucService.findAll();
-    return {
-      data: categories,
-      message: 'Get all categories successfully'
-    };
+    return categories;
   }
 
   @Public()
