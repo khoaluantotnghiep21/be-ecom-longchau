@@ -14,7 +14,16 @@ export class DanhMucService {
   ) {}
 
   async findAll(): Promise<DanhMuc[]> {
-    return await this.danhMucRepo.findAll();
+    const categories = await this.danhMucRepo.findAll();
+    
+    for (const category of categories) {
+      if (!category.slug) {
+        category.slug = slugify(category.tendanhmuc);
+        await category.save();
+      }
+    }
+    
+    return categories;
   }
 
   async findOne(madanhmuc: string): Promise<DanhMuc> {
@@ -22,11 +31,28 @@ export class DanhMucService {
     if (!category) {
       throw new Error('Category of Medication not found');
     }
+    
+
+    if (!category.slug) {
+      category.slug = slugify(category.tendanhmuc);
+      await category.save();
+    }
+    
     return category;
   }
 
   async getDanhMucByLoai(maloai: string): Promise<DanhMuc[]> {
-    return await this.danhMucRepo.findAll({ where: { maloai } });
+    const categories = await this.danhMucRepo.findAll({ where: { maloai } });
+    
+    // Kiểm tra và cập nhật slug nếu null
+    for (const category of categories) {
+      if (!category.slug) {
+        category.slug = slugify(category.tendanhmuc);
+        await category.save();
+      }
+    }
+    
+    return categories;
   }
 
   async createCategory(createCategoryDto: CreateCategoryDto): Promise<DanhMuc> {
@@ -55,5 +81,25 @@ export class DanhMucService {
       throw new Error('Category of Medication not found');
     }
     return await category.destroy();
+  }
+
+  async updateAllNullSlugs(): Promise<number> {
+    const categoriesWithNullSlug = await this.danhMucRepo.findAll({
+      where: {
+        slug: null
+      }
+    });
+    
+    let updatedCount = 0;
+    
+    for (const category of categoriesWithNullSlug) {
+      const slug = slugify(category.tendanhmuc);
+      
+      category.slug = slug;
+      await category.save();
+      updatedCount++;
+    }
+    
+    return updatedCount; 
   }
 }
