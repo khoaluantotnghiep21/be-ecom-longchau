@@ -7,4 +7,7 @@ export class Loai extends Model {
   maloai: string;
   @Column
   tenloai: string;
+  @Column
+  slug: string;
+
 }

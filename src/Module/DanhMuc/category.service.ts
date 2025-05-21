@@ -4,6 +4,7 @@ import { Repository } from 'sequelize-typescript';
 import { randomInt } from 'crypto';
 import { DanhMuc } from './category.entity';
 import { CreateCategoryDto } from './dto/createCategory.dto';
+import { slugify } from 'src/common/Utils/slugify';
 
 @Injectable()
 export class DanhMucService {
@@ -15,6 +16,7 @@ export class DanhMucService {
   async findAll(): Promise<DanhMuc[]> {
     return await this.danhMucRepo.findAll();
   }
+
   async findOne(madanhmuc: string): Promise<DanhMuc> {
     const category = await this.danhMucRepo.findOne({ where: { madanhmuc } });
     if (!category) {
@@ -29,7 +31,8 @@ export class DanhMucService {
 
   async createCategory(createCategoryDto: CreateCategoryDto): Promise<DanhMuc> {
     const madanhmuc = 'DM' + randomInt(1000000, 9999999).toString();
-    const data = { ...createCategoryDto, madanhmuc, soluong: 0 };
+    const slug = slugify(createCategoryDto.tendanhmuc);
+    const data = { ...createCategoryDto, madanhmuc, soluong: 0, slug };
     return await this.danhMucRepo.create(data);
   }
 
@@ -41,9 +44,11 @@ export class DanhMucService {
     if (!category) {
       throw new Error('Category of Medication not found');
     }
-    category.set(updateCategoryDto);
+    const slug = slugify(updateCategoryDto.tendanhmuc);
+    category.set({ ...updateCategoryDto, slug });
     return await category.save();
   }
+
   async deleteCategory(madanhmuc: string) {
     const category = await this.danhMucRepo.findOne({ where: { madanhmuc } });
     if (!category) {
