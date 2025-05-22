@@ -71,7 +71,7 @@ export class SanPhamService {
         },
         {
           model: Media,
-          attributes: ['url'],
+          attributes: ['url', 'ismain'],
         },
         {
           model: UnitDetals,
@@ -122,7 +122,7 @@ export class SanPhamService {
         },
         {
           model: Media,
-          attributes: ['url'],
+          attributes: ['url', 'ismain'],
         },
         {
           model: UnitDetals,
@@ -161,7 +161,7 @@ export class SanPhamService {
         },
         {
           model: Media,
-          attributes: ['url'],
+          attributes: ['url', 'ismain'],
         },
         {
           model: UnitDetals,
