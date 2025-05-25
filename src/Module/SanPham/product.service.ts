@@ -56,6 +56,9 @@ export class SanPhamService {
     const { count, rows } = await this.sanPhamModel.findAndCountAll({
       limit,
       offset,
+      order: [
+        ['tensanpham', 'ASC']
+      ],
       include: [
         {
           model: DanhMuc,

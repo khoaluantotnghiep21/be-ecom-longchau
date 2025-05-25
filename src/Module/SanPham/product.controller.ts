@@ -30,8 +30,8 @@ export class SanPhamController {
 
   @Public()
   @Get('getAllProducts')
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'take', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number})
+  @ApiQuery({ name: 'take', required: false, type: Number})
   async findAll(@Query('page') page?: number, @Query('take') take?: number) {
     return this.sanPhamService.findAllProduct(page, take);
   }
