@@ -7,6 +7,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     this.logger.log(AuthenticationMiddleware.name);
+  
     next();
   }
 }

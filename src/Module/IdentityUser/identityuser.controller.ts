@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { IdentityUserService } from './identityuser.service';
 import { Public } from 'src/common/decorator/public.decorator';
 import { SignInDto } from './dto/signIn.dto';
 import { CreateAccountDto } from './dto/createAccount.dto';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UpdateIdentityUserDto } from './dto/updateIdentityUser.dto';
+import { Roles } from 'src/common/decorator/roles.decorator';
+import { Role } from 'src/common/Enum/role.enum';
 
 @ApiBearerAuth('access-token')
 @ApiTags('IdentityUser')
@@ -61,4 +63,12 @@ export class IdentityUserController {
     const user = await this.identityUserService.updateUser(updateUserDto, sodienthoai);
     return user;
   }
+
+  @Get('getUserInfo')
+    getUserInfo(@Req() req: Request) {
+    const user = req['user'];
+    return {
+      userId: user?.sub,
+    };
+}
 }

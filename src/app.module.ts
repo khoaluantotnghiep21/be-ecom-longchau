@@ -25,6 +25,9 @@ import { LoaiModule } from './Module/Loai/loai.module';
 import { IngredientModule } from './Module/ThanhPhan/ingredient.module';
 import { UserRoleModule } from './Module/UserRole/userrole.module';
 import { IngredientDetalsModule } from './Module/ChiTietThanhPhan/ingredientDetals.module';
+import { VoucherModule } from './Module/Voucher/voucher.module';
+import { PharmacyModule } from './Module/NhaThuoc/pharmacy.module';
+import { PurchaseOrderModule } from './Module/DonHang/purchaseOrder.module';
 
 @Module({
   imports: [
@@ -60,7 +63,10 @@ import { IngredientDetalsModule } from './Module/ChiTietThanhPhan/ingredientDeta
     PromotionModule,
     LoaiModule,
     IngredientModule,
-    IngredientDetalsModule
+    IngredientDetalsModule,
+    VoucherModule,
+    PharmacyModule,
+    PurchaseOrderModule
   ],
   controllers: [AppController],
   providers: [

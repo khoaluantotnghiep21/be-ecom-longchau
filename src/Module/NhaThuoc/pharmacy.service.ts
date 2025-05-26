@@ -1,0 +1,60 @@
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Pharmacy } from './pharmacy.entity';
+import { CreatePharmacyDto } from './dto/createPharmacy.dto';
+import { UpdatePharmacyDto } from './dto/updatePharmacy.dto';
+
+@Injectable()
+export class PharmacyService {
+  constructor(
+    @InjectModel(Pharmacy)
+    private readonly pharmacyModel: typeof Pharmacy,
+  ) {}
+
+    async findAll(): Promise<any[]> {
+        const pharmacies = await this.pharmacyModel.findAll();
+        const result = pharmacies.map((pharmacy: Pharmacy) => ({
+            ...pharmacy.toJSON(),
+            diachi: [
+                pharmacy.dataValues.diachicuthe,
+                pharmacy.dataValues.tenduong,
+                pharmacy.dataValues.phuong,
+                pharmacy.dataValues.quan,
+                pharmacy.dataValues.thanhpho
+            ].filter(Boolean).join(', ')
+        }));
+        return result;
+    }
+
+    async createPharmacity(createPharmacityDto: CreatePharmacyDto): Promise<Pharmacy> {
+        const machinhanh = 'CN' + Math.floor(Math.random() * 90000000).toString();
+        const data = { machinhanh, ...createPharmacityDto };
+        const pharmacy = await this.pharmacyModel.create(data);
+        return pharmacy;
+    }
+    async findOne(machinhanh: string): Promise<Pharmacy> {
+            const pharmacy = await this.pharmacyModel.findOne({ where: { machinhanh } });
+            if (!pharmacy) {
+            throw new Error('Pharmacy not found');
+            }
+            return pharmacy;
+    }
+
+    async updatePharmacity(machinhanh: string, updatePharmacityDto: UpdatePharmacyDto): Promise<Pharmacy> {
+            const pharmacy = await this.pharmacyModel.findOne({ where: { machinhanh } });
+        if (!pharmacy) {
+        throw new Error('Pharmacy not found');
+        }
+        pharmacy.set(updatePharmacityDto);
+        return await pharmacy.save();
+    }
+    async deletePharmacity(machinhanh: string): Promise<boolean> {
+        const pharmacy = await this.pharmacyModel.findOne({ where: { machinhanh } });
+        if (!pharmacy) {
+        throw new Error('Pharmacy not found');
+        }
+        await pharmacy.destroy();
+        return true;
+    }
+    
+}

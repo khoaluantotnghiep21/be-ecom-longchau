@@ -67,7 +67,7 @@ export class SanPhamService {
         },
         {
           model: Promotion,
-          attributes: ['tenchuongtrinh'],
+          attributes: ['tenchuongtrinh', 'giatrikhuyenmai'],
         },
         {
           model: Media,
@@ -118,7 +118,7 @@ export class SanPhamService {
         },
         {
           model: Promotion,
-          attributes: ['tenchuongtrinh'],
+          attributes: ['tenchuongtrinh', 'giatrikhuyenmai'],
         },
         {
           model: Media,
@@ -157,7 +157,7 @@ export class SanPhamService {
         },
         {
           model: Promotion,
-          attributes: ['tenchuongtrinh'],
+          attributes: ['tenchuongtrinh', 'giatrikhuyenmai'],
         },
         {
           model: Media,
