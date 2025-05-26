@@ -25,6 +25,7 @@ import { LoaiModule } from './Module/Loai/loai.module';
 import { IngredientModule } from './Module/ThanhPhan/ingredient.module';
 import { UserRoleModule } from './Module/UserRole/userrole.module';
 import { IngredientDetalsModule } from './Module/ChiTietThanhPhan/ingredientDetals.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { IngredientDetalsModule } from './Module/ChiTietThanhPhan/ingredientDeta
     MediaModule,
     DanhMucModule,
     RoleModule,
+    PaymentModule,
     UserRoleModule,
     IdentityUserModule,
     ThuongHieuModule,
