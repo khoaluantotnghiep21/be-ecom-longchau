@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Param, Req } from '@nestjs/common';
+import { Body, Controller, Post, Param, Req, NotFoundException } from '@nestjs/common';
 import { PurchaseOrderService } from './purchaseOrder.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -10,19 +10,14 @@ import { OrderDetailsDto } from './dto/orderDetals.dto';
 export class PurchaseOrderController {
   constructor(private readonly purchaseOrderService: PurchaseOrderService) {}
 
-//   @Post('createNewPurchaseOrder')
-//   async create(@Req() req: Request) {
-//     const userid = req['user']?.sub;
-    
-//     console.log("heheh " + userid)
-//     return this.purchaseOrderService.createNewPurchaseOrder(userid);
-//   }
-    
-  @Post('addOrderDetails/:madonhang')
-  async addOrderDetails(
-    
-    @Body() orderDetailDto: OrderDetailsDto
-  ) {
-    return this.purchaseOrderService.addOrderDetails(orderDetailDto);
+  @Post('createNewPurchaseOrder')
+  async createNewPurchaseOrder(@Req() req: Request, @Body() orderDetailsDto: OrderDetailsDto) {
+    const userid = req['user']?.sub;
+    if (!userid) {
+      throw new NotFoundException('User ID not found in request');
+    }
+    return this.purchaseOrderService.createNewPurchaseOrder(userid, orderDetailsDto);
   }
+    
+  
 }

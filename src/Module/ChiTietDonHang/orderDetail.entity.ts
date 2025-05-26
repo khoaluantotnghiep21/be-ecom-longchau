@@ -15,4 +15,7 @@ export class OrderDetail extends Model {
 
   @Column
   giaban: number;
+
+  @Column
+  donvitinh: string;
 }

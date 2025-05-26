@@ -7,6 +7,11 @@ class OrderDetailItemDto {
     @ApiProperty()
     soluong: number;
 
+    @ApiProperty()
+    giaban: number;
+
+    @ApiProperty()
+    donvitinh: string;
 }
 
 export class OrderDetailsDto {
@@ -16,8 +21,16 @@ export class OrderDetailsDto {
     hinhthucnhanhang: string;
     @ApiProperty()
     mavoucher: string;
-
-
+    @ApiProperty()
+    tongtien: number;
+    @ApiProperty()
+    giamgiatructiep: number;
+    @ApiProperty()
+    thanhtien: number;
+    @ApiProperty()
+    phivanchuyen: number;
+    @ApiProperty()
+    machinhhanh?: string;
     @ApiProperty({ type: [OrderDetailItemDto], description: 'Danh sách chi tiết đơn hàng' })
     details: OrderDetailItemDto[];
 }

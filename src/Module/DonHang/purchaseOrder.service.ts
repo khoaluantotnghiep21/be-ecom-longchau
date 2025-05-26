@@ -23,24 +23,40 @@ export class PurchaseOrderService {
         return num.length;
     }
 
-    async createNewPurchaseOrder(userid: UUID, orderDetailDto: OrderDetailsDto): Promise<PurchaseOrder> {
+    async createNewPurchaseOrder(userid: UUID, orderDetailDto: OrderDetailsDto): Promise<any> {
         const today = new Date();
-        const todayStr = today.toISOString().slice(0, 10); 
+        const todayStr = today.toISOString().slice(0, 10);
         const orderId = (await this.countOrders() + 1).toString().padStart(4, '0');
         const madonhang = `DH${todayStr.replace(/-/g, '')}${orderId}`;
         const trangthai = StatusPurchase.Pending;
-        const data = { madonhang, ngaymuahang: todayStr, userid , trangthai};
-        //const product = await this.productRepo.findOne({ where: { masanpham: orderDetailDto.details.map(item => item.masanpham) } });
-        for(const item of orderDetailDto.details) {
-            const [products] = await this.sequelize.query
-            (`
-                select s.id, s.masanpham, d.donvitinh, ct.giaban, ct.dinhluong, c.giatrikhuyenmai
-                from sanpham s, donvitinh d, chitietdonvi ct, chuongtrinhkhuyenmai c 
-                where d.madonvitinh = ct.madonvitinh and s.machuongtrinh = c.machuongtrinh and ct.masanpham = s.masanpham  and s.masanpham = '${item.masanpham}'
-            `)
+        const t = await this.sequelize.transaction();
+        try {
+            // 1. Thêm đơn hàng trước
+            const data = {
+                madonhang,
+                ngaymuahang: todayStr,
+                userid,
+                trangthai,
+                ...orderDetailDto,
+            };
+            const newOrder = await this.purchaseOrderRepo.create(data, { transaction: t });
+
+            // 2. Thêm chi tiết đơn hàng sau khi đơn hàng đã tồn tại
+            const orderDetails = orderDetailDto.details.map((item) => ({
+                madonhang,
+                masanpham: item.masanpham,
+                soluong: item.soluong,
+                giaban: item.giaban,
+                donvitinh: item.donvitinh,
+            }));
+            await OrderDetail.bulkCreate(orderDetails, { transaction: t });
+
+            await t.commit();
+            return newOrder;
+        } catch (error) {
+            await t.rollback();
+            throw error;
         }
-        return this.purchaseOrderRepo.create(data);
-        //return await OrderDetail.bulkCreate(orderDetails);
     }
 
     async addOrderDetails(orderDetailDto: OrderDetailsDto) {
