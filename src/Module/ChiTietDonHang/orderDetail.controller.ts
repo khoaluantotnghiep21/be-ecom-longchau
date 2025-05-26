@@ -5,13 +5,5 @@ import { OrderDetailService } from './orderDetail.service';
 export class OrderDetailController {
   constructor(private readonly orderDetailService: OrderDetailService) {}
 
-  @Get()
-  async findAll() {
-    return this.orderDetailService.findAll();
-  }
-
-  @Get(':madonhang')
-  async findByOrderId(@Param('madonhang') madonhang: string) {
-    return this.orderDetailService.findByOrderId(madonhang);
-  }
+ 
 }

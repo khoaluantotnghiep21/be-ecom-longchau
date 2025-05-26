@@ -56,52 +56,43 @@ export class SanPhamService {
     const { count, rows } = await this.sanPhamModel.findAndCountAll({
       limit,
       offset,
-      order: [
-        ['tensanpham', 'ASC']
-      ],
+      order: [['tensanpham', 'ASC']],
       include: [
-        {
-          model: DanhMuc,
-          attributes: ['tendanhmuc', 'slug'],
-        },
-        {
-          model: ThuongHieu,
-          attributes: ['tenthuonghieu'],
-        },
-        {
-          model: Promotion,
-          attributes: ['tenchuongtrinh', 'giatrikhuyenmai'],
-        },
-        {
-          model: Media,
-          attributes: ['url', 'ismain'],
-        },
+        { model: DanhMuc, attributes: ['tendanhmuc', 'slug'] },
+        { model: ThuongHieu, attributes: ['tenthuonghieu'] },
+        { model: Promotion, attributes: ['tenchuongtrinh', 'giatrikhuyenmai'] },
+        { model: Media, attributes: ['url', 'ismain'] },
         {
           model: UnitDetals,
+          as: 'chitietdonvi',
           attributes: ['dinhluong', 'giaban'],
-          include: [
-            {
-              model: Unit,
-              attributes: ['donvitinh'],
-            },
-          ],
+          include: [{ model: Unit, attributes: ['donvitinh'] }],
         },
         {
           model: IngredientDetals,
           attributes: ['hamluong'],
-          include: [
-            {
-              model: Ingredient,
-              attributes: ['tenthanhphan'],
-            },
-          ],
+          include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
         },
       ],
+      raw: false,
+      nest: true,
       distinct: true,
     });
 
+    const data = rows.map((rawProduct: any) => {
+      const product = rawProduct.get ? rawProduct.get({ plain: true }) : rawProduct;
+      const khuyenmai = product.khuyenmai?.giatrikhuyenmai ?? 0;
+      if (product.chitietdonvi && Array.isArray(product.chitietdonvi)) {
+        product.chitietdonvi = product.chitietdonvi.map((donvi: any) => ({
+          ...donvi,
+          giabanSauKhuyenMai: donvi.giaban - (donvi.giaban * (khuyenmai / 100)),
+        }));
+      }
+      return product;
+    });
+
     return {
-      data: rows,
+      data,
       meta: {
         total: count,
         page: currentPage,
@@ -111,98 +102,87 @@ export class SanPhamService {
     };
   }
 
-  async findOneProductByCategory(madanhmuc: string) {
-    return this.sanPhamModel.findAll({
+  async findOneProductByCategory(madanhmuc: string): Promise<any[]> {
+    const products = await this.sanPhamModel.findAll({
       where: { madanhmuc },
       include: [
-        {
-          model: DanhMuc,
-          attributes: ['tendanhmuc'],
-        },
-        {
-          model: ThuongHieu,
-          attributes: ['tenthuonghieu'],
-        },
-        {
-          model: Promotion,
-          attributes: ['tenchuongtrinh', 'giatrikhuyenmai'],
-        },
-        {
-          model: Media,
-          attributes: ['url', 'ismain'],
-        },
-        {
-          model: UnitDetals,
-          attributes: ['dinhluong', 'giaban'],
-          include: [
-            {
-              model: Unit,
-              attributes: ['donvitinh'],
-            },
-          ],
-        },
-        {
-          model: IngredientDetals,
-          attributes: ['hamluong'],
-          include: [
-            {
-              model: Ingredient,
-              attributes: ['tenthanhphan'],
-            },
-          ],
-        },
-      ],
-    });
-  }
-
-  async findOneProduct(masanpham: string): Promise<SanPham> {
-    const product = await this.sanPhamModel.findOne({
-      where: { masanpham },
-      include: [
-        {
-          model: DanhMuc,
-          attributes: ['tendanhmuc'],
-        },
-        {
-          model: ThuongHieu,
-          attributes: ['tenthuonghieu'],
-        },
-        {
-          model: Promotion,
-          attributes: ['tenchuongtrinh', 'giatrikhuyenmai'],
-        },
-        {
-          model: Media,
-          attributes: ['url', 'ismain'],
-        },
+        { model: DanhMuc, attributes: ['tendanhmuc'] },
+        { model: ThuongHieu, attributes: ['tenthuonghieu'] },
+        { model: Promotion, attributes: ['tenchuongtrinh', 'giatrikhuyenmai'] },
+        { model: Media, attributes: ['url', 'ismain'] },
         {
           model: UnitDetals,
           as: 'chitietdonvi',
           attributes: ['dinhluong', 'giaban'],
-          include: [
-            {
-              model: Unit,
-              attributes: ['donvitinh'],
-            },
-          ],
+          include: [{ model: Unit, attributes: ['donvitinh'] }],
         },
         {
           model: IngredientDetals,
           attributes: ['hamluong'],
-          include: [
-            {
-              model: Ingredient,
-              attributes: ['tenthanhphan'],
-            },
-          ],
+          include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
         },
       ],
+      raw: false,
+      nest: true,
     });
-    if (!product) {
+
+    return products.map((rawProduct: any) => {
+      const product = rawProduct.get ? rawProduct.get({ plain: true }) : rawProduct;
+      const khuyenmai = product.khuyenmai?.giatrikhuyenmai ?? 0;
+      if (product.chitietdonvi && Array.isArray(product.chitietdonvi)) {
+        product.chitietdonvi = product.chitietdonvi.map((donvi: any) => ({
+          ...donvi,
+          giabanSauKhuyenMai: donvi.giaban - (donvi.giaban * (khuyenmai / 100)),
+        }));
+      }
+      return product;
+    });
+  }
+
+  async findOneProduct(masanpham: string): Promise<SanPham> {
+    const rawProduct = await this.sanPhamModel.findOne({
+    where: { masanpham },
+    include: [
+      { model: DanhMuc, attributes: ['tendanhmuc'] },
+      { model: ThuongHieu, attributes: ['tenthuonghieu'] },
+      { model: Promotion, attributes: ['tenchuongtrinh', 'giatrikhuyenmai'] },
+      { model: Media, attributes: ['url', 'ismain'] },
+      {
+        model: UnitDetals,
+        as: 'chitietdonvi', // phải khớp với association trong model
+        attributes: ['dinhluong', 'giaban'],
+        include: [{ model: Unit, attributes: ['donvitinh'] }],
+      },
+      {
+        model: IngredientDetals,
+        attributes: ['hamluong'],
+        include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
+      },
+    ],
+    raw: false,
+    nest: true,
+  });
+
+    if (!rawProduct) {
       throw new Error('Product not found');
     }
+
+    const product = rawProduct.get({ plain: true });
+
+    const khuyenmai = product.khuyenmai?.giatrikhuyenmai ?? 0;
+
+
+    if (product.chitietdonvi && Array.isArray(product.chitietdonvi)) {
+      product.chitietdonvi = product.chitietdonvi.map((donvi: any) => ({
+        ...donvi,
+        giabanSauKhuyenMai: donvi.giaban - (donvi.giaban * (khuyenmai / 100))
+
+      }));
+    }
+
     return product;
-  }
+
+}
 
   async updateProduct(
     masanpham: string,

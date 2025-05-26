@@ -89,10 +89,7 @@ export class SanPham extends Model<SanPham> {
   @HasMany(() => Media)
   anhsanpham: Media[];
  
-  @HasMany(() => UnitDetals, {
-    sourceKey: 'masanpham', 
-    foreignKey: 'masanpham'  
-  })
+  @HasMany(() => UnitDetals, { as: 'chitietdonvi', sourceKey: 'masanpham', foreignKey: 'masanpham' })
   chitietdonvi: UnitDetals[];
 
   @HasMany(() =>IngredientDetals,{
