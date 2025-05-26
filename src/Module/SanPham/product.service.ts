@@ -56,10 +56,13 @@ export class SanPhamService {
     const { count, rows } = await this.sanPhamModel.findAndCountAll({
       limit,
       offset,
+      order: [
+        ['tensanpham', 'ASC']
+      ],
       include: [
         {
           model: DanhMuc,
-          attributes: ['tendanhmuc'],
+          attributes: ['tendanhmuc', 'slug'],
         },
         {
           model: ThuongHieu,
@@ -76,19 +79,23 @@ export class SanPhamService {
         {
           model: UnitDetals,
           attributes: ['dinhluong', 'giaban'],
-          include: [{
-            model: Unit,
-            attributes: ['donvitinh']
-          }]
-        }, 
+          include: [
+            {
+              model: Unit,
+              attributes: ['donvitinh'],
+            },
+          ],
+        },
         {
           model: IngredientDetals,
           attributes: ['hamluong'],
-          include:[{
-            model: Ingredient,
-            attributes: ['tenthanhphan']
-          }]
-        }
+          include: [
+            {
+              model: Ingredient,
+              attributes: ['tenthanhphan'],
+            },
+          ],
+        },
       ],
       distinct: true,
     });
@@ -127,26 +134,31 @@ export class SanPhamService {
         {
           model: UnitDetals,
           attributes: ['dinhluong', 'giaban'],
-          include: [{
-            model: Unit,
-            attributes: ['donvitinh']
-          }]
-        }, 
+          include: [
+            {
+              model: Unit,
+              attributes: ['donvitinh'],
+            },
+          ],
+        },
         {
           model: IngredientDetals,
           attributes: ['hamluong'],
-          include:[{
-            model: Ingredient,
-            attributes: ['tenthanhphan']
-          }]
-        }
+          include: [
+            {
+              model: Ingredient,
+              attributes: ['tenthanhphan'],
+            },
+          ],
+        },
       ],
     });
   }
 
   async findOneProduct(masanpham: string): Promise<SanPham> {
-    const product = await this.sanPhamModel.findOne({ where: { masanpham },
-    include: [
+    const product = await this.sanPhamModel.findOne({
+      where: { masanpham },
+      include: [
         {
           model: DanhMuc,
           attributes: ['tendanhmuc'],
@@ -167,20 +179,24 @@ export class SanPhamService {
           model: UnitDetals,
           as: 'chitietdonvi',
           attributes: ['dinhluong', 'giaban'],
-          include: [{
-            model: Unit,
-            attributes: ['donvitinh']
-          }]
+          include: [
+            {
+              model: Unit,
+              attributes: ['donvitinh'],
+            },
+          ],
         },
         {
           model: IngredientDetals,
           attributes: ['hamluong'],
-          include:[{
-            model: Ingredient,
-            attributes: ['tenthanhphan']
-          }]
-        }
-      ] 
+          include: [
+            {
+              model: Ingredient,
+              attributes: ['tenthanhphan'],
+            },
+          ],
+        },
+      ],
     });
     if (!product) {
       throw new Error('Product not found');
