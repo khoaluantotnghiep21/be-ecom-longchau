@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Pharmacy } from './pharmacy.entity';
 import { CreatePharmacyDto } from './dto/createPharmacy.dto';
 import { UpdatePharmacyDto } from './dto/updatePharmacy.dto';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class PharmacyService {
   constructor(
     @InjectModel(Pharmacy)
     private readonly pharmacyModel: typeof Pharmacy,
+    private readonly sequelize: Sequelize,
   ) {}
 
     async findAll(): Promise<any[]> {
@@ -57,4 +59,15 @@ export class PharmacyService {
         return true;
     }
     
+    async findPharmacyByProvinces(provinces: string): Promise<Pharmacy[]> {
+        const data = await this.sequelize.query(
+            `SELECT * FROM nhathuoc WHERE thanhpho LIKE :provinces`,
+            {
+                replacements: { provinces: `%${provinces}%` },
+                model: this.pharmacyModel,
+                mapToModel: true,
+            }
+        );
+        return data
+    }
 }

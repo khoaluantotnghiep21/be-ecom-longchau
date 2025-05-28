@@ -16,16 +16,19 @@ export class PharmacyController {
     return this.pharmacyService.findAll();
   }
 
+  @Public()
   @Get('findOnePharmacy/:machinhanh')
   async findOne(@Param('machinhanh') machinhanh: string) {
     return this.pharmacyService.findOne(machinhanh);
   }
 
+  @Public()
   @Post('createNewPharmacy')
   async create(@Body() createPharmacyDto: CreatePharmacyDto) {
     return this.pharmacyService.createPharmacity(createPharmacyDto);
   }
 
+  @Public()
   @Put('updatePharmacy/:machinhanh')
   async update(
     @Param('machinhanh') machinhanh: string,
@@ -34,8 +37,15 @@ export class PharmacyController {
     return this.pharmacyService.updatePharmacity(machinhanh, updatePharmacyDto);
   }
 
+  @Public()
   @Delete('deletePharmacy/:machinhanh')
   async delete(@Param('machinhanh') machinhanh: string) {
     return this.pharmacyService.deletePharmacity(machinhanh);
+  }
+  
+  @Public()
+  @Get('findPharmacyByProvinces/:tinhthanh')
+  async findPharmacyByProvinces(@Param('tinhthanh') tinhthanh: string) {
+    return this.pharmacyService.findPharmacyByProvinces(tinhthanh);
   }
 }

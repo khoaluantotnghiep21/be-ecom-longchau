@@ -8,7 +8,7 @@ import { SanPham } from '../SanPham/product.entity';
 
 @Module({
   imports: [SequelizeModule.forFeature([PurchaseOrder, SanPham])],
-  providers: [PurchaseOrderService, AuthGuard],
+  providers: [PurchaseOrderService ,AuthGuard],
   controllers: [PurchaseOrderController],
   exports: [AuthGuard]
 })

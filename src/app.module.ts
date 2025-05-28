@@ -78,11 +78,11 @@ import { OrderDetailModule } from './Module/ChiTietDonHang/orderDetail.module';
       provide: 'APP_GUARD',
       useClass: AuthGuard,
     },
-    {
-      provide: 'APP_INTERCEPTOR',
-      scope: Scope.REQUEST,
-      useClass: LoggingInterceptor,
-    },
+    // {
+    //   provide: 'APP_INTERCEPTOR',
+    //   scope: Scope.REQUEST,
+    //   useClass: LoggingInterceptor,
+    // },
     {
       provide: 'APP_PIPE',
       useClass: FreezePipe,
