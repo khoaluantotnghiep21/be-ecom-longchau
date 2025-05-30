@@ -15,6 +15,7 @@ import { Unit } from '../DonViTinh/donvitinh.entity';
 import { UnitDetals } from '../ChiTietDonViTinh/chitietdonvitinh.entity';
 import { IngredientDetals } from '../ChiTietThanhPhan/ingredientDetals.entity';
 import { Ingredient } from '../ThanhPhan/ingredient.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class SanPhamService {
@@ -23,7 +24,7 @@ export class SanPhamService {
     private readonly sanPhamModel: Repository<SanPham>,
     @InjectModel(DanhMuc)
     private readonly danhMucModel: Repository<DanhMuc>,
-  ) {}
+  ) { }
 
   async createNewProduct(createProductDto: CreateProductDto): Promise<SanPham> {
     const masanpham = 'SP' + randomInt(10000000, 99999999).toString();
@@ -141,27 +142,27 @@ export class SanPhamService {
 
   async findOneProduct(masanpham: string): Promise<SanPham> {
     const rawProduct = await this.sanPhamModel.findOne({
-    where: { masanpham },
-    include: [
-      { model: DanhMuc, attributes: ['tendanhmuc'] },
-      { model: ThuongHieu, attributes: ['tenthuonghieu'] },
-      { model: Promotion, attributes: ['tenchuongtrinh', 'giatrikhuyenmai'] },
-      { model: Media, attributes: ['url', 'ismain'] },
-      {
-        model: UnitDetals,
-        as: 'chitietdonvi', // phải khớp với association trong model
-        attributes: ['dinhluong', 'giaban'],
-        include: [{ model: Unit, attributes: ['donvitinh'] }],
-      },
-      {
-        model: IngredientDetals,
-        attributes: ['hamluong'],
-        include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
-      },
-    ],
-    raw: false,
-    nest: true,
-  });
+      where: { masanpham },
+      include: [
+        { model: DanhMuc, attributes: ['tendanhmuc'] },
+        { model: ThuongHieu, attributes: ['tenthuonghieu'] },
+        { model: Promotion, attributes: ['tenchuongtrinh', 'giatrikhuyenmai'] },
+        { model: Media, attributes: ['url', 'ismain'] },
+        {
+          model: UnitDetals,
+          as: 'chitietdonvi', // phải khớp với association trong model
+          attributes: ['dinhluong', 'giaban'],
+          include: [{ model: Unit, attributes: ['donvitinh'] }],
+        },
+        {
+          model: IngredientDetals,
+          attributes: ['hamluong'],
+          include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
+        },
+      ],
+      raw: false,
+      nest: true,
+    });
 
     if (!rawProduct) {
       throw new Error('Product not found');
@@ -182,7 +183,7 @@ export class SanPhamService {
 
     return product;
 
-}
+  }
 
   async updateProduct(
     masanpham: string,
@@ -248,5 +249,91 @@ export class SanPhamService {
     danhmuc.set({ soluong: soluonggiam });
     await danhmuc.save();
     return this.sanPhamModel.destroy({ where: { masanpham } });
+  }
+
+
+
+
+  async searchProducts(query: string, page?: number, take?: number) {
+    if (!query) {
+      throw new Error('Query is required');
+    }
+
+    const currentPage = page ? parseInt(page.toString()) : 1;
+    const limit = take ? parseInt(take.toString()) : 10;
+    const offset = (currentPage - 1) * limit;
+
+    // Chuyển query thành dạng không dấu để tìm kiếm
+    const queryWithoutDiacritics = slugify(query);
+
+    const { count, rows } = await this.sanPhamModel.findAndCountAll({
+      where: {
+        [Op.or]: [
+          { tensanpham: { [Op.iLike]: `%${query}%` } }, // Tìm kiếm có dấu trong tensanpham
+          { masanpham: { [Op.iLike]: `%${query}%` } }, // Tìm kiếm trong masanpham
+          { slug: { [Op.iLike]: `%${queryWithoutDiacritics}%` } }, // Tìm kiếm không dấu trong slug
+          { slug: { [Op.iLike]: `%${query}%` } }, // Tìm kiếm có dấu trong slug
+        ],
+      },
+      limit,
+      offset,
+      order: [['tensanpham', 'ASC']],
+      include: [
+        { model: DanhMuc, attributes: ['tendanhmuc', 'slug'] },
+        { model: ThuongHieu, attributes: ['tenthuonghieu'] },
+        { model: Promotion, attributes: ['tenchuongtrinh', 'giatrikhuyenmai'] },
+        { model: Media, attributes: ['url', 'ismain'], as: 'anhsanpham' }, // Khớp với alias trong response
+        {
+          model: UnitDetals,
+          as: 'chitietdonvi',
+          attributes: ['dinhluong', 'giaban'],
+          include: [{ model: Unit, attributes: ['donvitinh'] }],
+        },
+        {
+          model: IngredientDetals,
+          as: 'chitietthanhphan', // Khớp với alias trong response
+          attributes: ['hamluong'],
+          include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
+        },
+      ],
+      raw: false,
+      nest: true,
+      distinct: true,
+    });
+
+    // Kiểm tra nếu offset vượt quá số lượng sản phẩm
+    if (offset >= count) {
+      return {
+        data: [],
+        meta: {
+          total: count,
+          page: currentPage,
+          take: limit,
+          pageCount: Math.ceil(count / limit),
+        },
+      };
+    }
+
+    const data = rows.map((rawProduct: any) => {
+      const product = rawProduct.get ? rawProduct.get({ plain: true }) : rawProduct;
+      const khuyenmai = product.khuyenmai?.giatrikhuyenmai ?? 0;
+      if (product.chitietdonvi && Array.isArray(product.chitietdonvi)) {
+        product.chitietdonvi = product.chitietdonvi.map((donvi: any) => ({
+          ...donvi,
+          giabanSauKhuyenMai: donvi.giaban - (donvi.giaban * (khuyenmai / 100)),
+        }));
+      }
+      return product;
+    });
+
+    return {
+      data,
+      meta: {
+        total: count,
+        page: currentPage,
+        take: limit,
+        pageCount: Math.ceil(count / limit),
+      },
+    };
   }
 }

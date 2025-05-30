@@ -20,7 +20,7 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 @ApiTags('Product')
 @Controller('product')
 export class SanPhamController {
-  constructor(private readonly sanPhamService: SanPhamService) {}
+  constructor(private readonly sanPhamService: SanPhamService) { }
 
   @Roles(Role.Admin, Role.Staff)
   @Post('createProduct')
@@ -30,8 +30,8 @@ export class SanPhamController {
 
   @Public()
   @Get('getAllProducts')
-  @ApiQuery({ name: 'page', required: false, type: Number})
-  @ApiQuery({ name: 'take', required: false, type: Number})
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'take', required: false, type: Number })
   async findAll(@Query('page') page?: number, @Query('take') take?: number) {
     return this.sanPhamService.findAllProduct(page, take);
   }
@@ -60,5 +60,20 @@ export class SanPhamController {
   @Delete('deleteProduct/:masanpham')
   async delete(@Param('masanpham') masanpham: string) {
     return await this.sanPhamService.deleteProduct(masanpham);
+  }
+
+  @Public()
+  @Get('search')
+  async searchProducts(
+    @Query('query') query: string,
+    @Query('page') page?: number,
+    @Query('take') take?: number,
+  ) {
+    if (!query) {
+      throw new Error('Query is required');
+    }
+    // Giải mã query để xử lý tiếng Việt
+    const decodedQuery = decodeURIComponent(query);
+    return this.sanPhamService.searchProducts(decodedQuery, page, take);
   }
 }
