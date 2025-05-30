@@ -3,16 +3,16 @@ import { IsDate, IsEmail } from "class-validator";
 
 export class UpdateIdentityUserDto {
     @ApiProperty()
-    hoten: string;
+    hoten?: string;
     
     @IsEmail()
     @ApiProperty()
-    email: string;
+    email?: string;
 
     @IsDate()
     @ApiProperty()
-    ngaysinh: Date;
+    ngaysinh?: Date;
 
     @ApiProperty()
-    gioitinh: string;
+    gioitinh?: string;
 }

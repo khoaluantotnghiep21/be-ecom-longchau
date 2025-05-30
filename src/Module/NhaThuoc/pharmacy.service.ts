@@ -59,11 +59,11 @@ export class PharmacyService {
         return true;
     }
     
-    async findPharmacyByProvinces(provinces: string): Promise<Pharmacy[]> {
+    async findPharmacyByProvinces(provinces: string, district: string): Promise<Pharmacy[]> {
         const data = await this.sequelize.query(
-            `SELECT * FROM nhathuoc WHERE thanhpho LIKE :provinces`,
+            `SELECT * FROM nhathuoc WHERE thanhpho LIKE :provinces AND quan LIKE :district`,
             {
-                replacements: { provinces: `%${provinces}%` },
+                replacements: { provinces: `%${provinces}%`, district: `%${district}%` },
                 model: this.pharmacyModel,
                 mapToModel: true,
             }

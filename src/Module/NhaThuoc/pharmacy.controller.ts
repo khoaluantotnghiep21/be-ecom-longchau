@@ -44,8 +44,8 @@ export class PharmacyController {
   }
   
   @Public()
-  @Get('findPharmacyByProvinces/:tinhthanh')
-  async findPharmacyByProvinces(@Param('tinhthanh') tinhthanh: string) {
-    return this.pharmacyService.findPharmacyByProvinces(tinhthanh);
+  @Get('findPharmacyByProvinces/:tinhthanh/:quan')
+  async findPharmacyByProvinces(@Param('tinhthanh') tinhthanh: string, @Param('quan') quan: string) {
+    return this.pharmacyService.findPharmacyByProvinces(tinhthanh, quan);
   }
 }
