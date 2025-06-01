@@ -19,19 +19,19 @@ export class IdentityUserService {
     @InjectModel(Role)
     private readonly roleRepo: Repository<Role>,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   async isPhoneNumberExist(phoneNumber: string): Promise<boolean> {
     const user = await this.identityUserRepo.findOne({
       where: { sodienthoai: phoneNumber },
     });
-    return !!user; // Trả về true nếu user tồn tại, false nếu không tồn tại
+    return !!user; 
   }
 
   async getUserByPhoneNumber(phoneNumber: string) {
     const user = await this.identityUserRepo.findOne({
       where: { sodienthoai: phoneNumber },
-      attributes: { exclude: ['matkhau'] }, // Loại bỏ mật khẩu khỏi kết quả
+      attributes: { exclude: ['matkhau'] },
     });
 
     if (!user) {
@@ -42,7 +42,6 @@ export class IdentityUserService {
   }
 
   async createAccount(createAccountDto: CreateAccountDto): Promise<UserRole> {
-    // Kiểm tra số điện thoại đã tồn tại chưa
     const phoneExists = await this.isPhoneNumberExist(
       createAccountDto.sodienthoai,
     );
@@ -87,7 +86,7 @@ export class IdentityUserService {
     }
     const password = user.dataValues.matkhau;
     const isPasswordValid = await bcrypt.compare(signInDto.matkhau, password)
-    if(!isPasswordValid){
+    if (!isPasswordValid) {
       throw new NotFoundException('Account information not found')
     }
     const userRoles = await this.userRoleRepo.findAll({
@@ -110,7 +109,7 @@ export class IdentityUserService {
     const nameroles = roles.map((role) => role.dataValues.namerole) as string[];
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const payload = { sub: user.dataValues.id, numberPhone:user.dataValues.sodienthoai, nameuser: user.dataValues.hoten ,roles: nameroles };
+    const payload = { sub: user.dataValues.id, numberPhone: user.dataValues.sodienthoai, nameuser: user.dataValues.hoten, roles: nameroles };
 
     return {
       accessToken: await this.jwtService.signAsync(payload),

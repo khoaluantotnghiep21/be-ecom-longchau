@@ -51,7 +51,7 @@ export class SanPhamService {
 
   async findAllProduct(page?: number, take?: number) {
     const currentPage = page ? parseInt(page.toString()) : 1;
-    const limit = take ? parseInt(take.toString()) : 10;
+    const limit = take ? parseInt(take.toString()) : 12;
     const offset = (currentPage - 1) * limit;
 
     const { count, rows } = await this.sanPhamModel.findAndCountAll({
@@ -251,28 +251,24 @@ export class SanPhamService {
     return this.sanPhamModel.destroy({ where: { masanpham } });
   }
 
-
-
-
   async searchProducts(query: string, page?: number, take?: number) {
     if (!query) {
       throw new Error('Query is required');
     }
 
     const currentPage = page ? parseInt(page.toString()) : 1;
-    const limit = take ? parseInt(take.toString()) : 10;
+    const limit = take ? parseInt(take.toString()) : 12;
     const offset = (currentPage - 1) * limit;
 
-    // Chuyển query thành dạng không dấu để tìm kiếm
     const queryWithoutDiacritics = slugify(query);
 
     const { count, rows } = await this.sanPhamModel.findAndCountAll({
       where: {
         [Op.or]: [
-          { tensanpham: { [Op.iLike]: `%${query}%` } }, // Tìm kiếm có dấu trong tensanpham
-          { masanpham: { [Op.iLike]: `%${query}%` } }, // Tìm kiếm trong masanpham
-          { slug: { [Op.iLike]: `%${queryWithoutDiacritics}%` } }, // Tìm kiếm không dấu trong slug
-          { slug: { [Op.iLike]: `%${query}%` } }, // Tìm kiếm có dấu trong slug
+          { tensanpham: { [Op.iLike]: `%${query}%` } }, 
+          { masanpham: { [Op.iLike]: `%${query}%` } }, 
+          { slug: { [Op.iLike]: `%${queryWithoutDiacritics}%` } },
+          { slug: { [Op.iLike]: `%${query}%` } },
         ],
       },
       limit,
@@ -282,7 +278,7 @@ export class SanPhamService {
         { model: DanhMuc, attributes: ['tendanhmuc', 'slug'] },
         { model: ThuongHieu, attributes: ['tenthuonghieu'] },
         { model: Promotion, attributes: ['tenchuongtrinh', 'giatrikhuyenmai'] },
-        { model: Media, attributes: ['url', 'ismain'], as: 'anhsanpham' }, // Khớp với alias trong response
+        { model: Media, attributes: ['url', 'ismain'], as: 'anhsanpham' },
         {
           model: UnitDetals,
           as: 'chitietdonvi',
@@ -291,7 +287,7 @@ export class SanPhamService {
         },
         {
           model: IngredientDetals,
-          as: 'chitietthanhphan', // Khớp với alias trong response
+          as: 'chitietthanhphan',
           attributes: ['hamluong'],
           include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
         },
@@ -301,7 +297,6 @@ export class SanPhamService {
       distinct: true,
     });
 
-    // Kiểm tra nếu offset vượt quá số lượng sản phẩm
     if (offset >= count) {
       return {
         data: [],

@@ -7,26 +7,26 @@ import { UserRole } from "./userrole.entity";
 import { UUID } from "crypto";
 @ApiTags('UserRole')
 @Controller('UserRole')
-export class UserRoleController{
+export class UserRoleController {
     constructor(
         private readonly userRoleService: UserRoleService
-    ){}
+    ) { }
 
     @Public()
     @Post('createUserRole')
-    async createUserRole(@Body() userRoleDto:UserRoleDto): Promise<UserRole>{
+    async createUserRole(@Body() userRoleDto: UserRoleDto): Promise<UserRole> {
         return this.userRoleService.createUserRole(userRoleDto)
     }
 
     @Public()
     @Put('updateUserRole/:userid/:roleid')
-    async updateUserRole(@Param('userid') userid: UUID, @Param('roleid') roleid: UUID): Promise<UserRole>{
+    async updateUserRole(@Param('userid') userid: UUID, @Param('roleid') roleid: UUID): Promise<UserRole> {
         return this.userRoleService.updateUserRole(userid, roleid)
     }
 
     @Public()
     @Get('getUserRoles/:userid')
-    async findUserByRoleId(@Param('userid') userid: UUID){
+    async findUserByRoleId(@Param('userid') userid: UUID) {
         return this.userRoleService.getAllRolesByUserId(userid)
     }
 }
