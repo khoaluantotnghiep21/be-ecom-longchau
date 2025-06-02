@@ -10,12 +10,15 @@ export class OrderDetail extends Model {
   @Column
   masanpham: string;
 
+  @PrimaryKey
+  @Column
+  donvitinh: string;
+
   @Column
   soluong: number;
 
   @Column
   giaban: number;
 
-  @Column
-  donvitinh: string;
+  
 }
