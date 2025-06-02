@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import * as dayjs from 'dayjs';
 import { console } from 'inspector';
 import { Public } from 'src/common/decorator/public.decorator';
+import { UUID } from 'crypto';
 @ApiBearerAuth('access-token')
 
 @ApiTags('Purchase Order')
@@ -197,5 +198,14 @@ export class PurchaseOrderController {
     const parsedUrl = new URL(url);
     const params = Object.fromEntries(parsedUrl.searchParams.entries());
     return params
+  }
+
+  @Public()
+  @Get('getOderByUserId/:userid')
+  async getOderByUserId(@Param('userid') userid: UUID) {
+    if (!userid) {
+      throw new NotFoundException('User ID not found');
+    }
+    return this.purchaseOrderService.getOrdersByUserId(userid);
   }
 }

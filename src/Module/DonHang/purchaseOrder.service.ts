@@ -80,4 +80,20 @@ export class PurchaseOrderService {
         }
         return order;
     }
+    async getOrdersByUserId(userid: UUID): Promise<any[]> {
+        const [results] = await this.sequelize.query(
+            `
+            SELECT d.madonhang, i.hoten, s.tensanpham, ct.donvitinh, ct.soluong, ct.giaban, d.thanhtien, d.trangthai 
+            FROM identityuser i , donhang d, chitietdonhang ct, sanpham s 
+            WHERE i.id = d.userid AND d.madonhang = ct.madonhang AND ct.masanpham = s.masanpham AND i.id = :userid    
+            `,
+            {
+                replacements: { userid },
+                raw: true, // Chỉ lấy dữ liệu thuần túy
+                plain: false // Trả về mảng kết quả
+            }
+        );
+        
+        return results || []; // Đảm bảo luôn trả về mảng
+    }
 }
