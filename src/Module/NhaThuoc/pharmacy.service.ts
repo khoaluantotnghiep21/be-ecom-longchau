@@ -59,7 +59,7 @@ export class PharmacyService {
         return true;
     }
     
-    async findPharmacyByProvinces(provinces: string, district: string): Promise<Pharmacy[]> {
+    async findPharmacyByProvinces(provinces: string, district: string): Promise<any[]> {
         const data = await this.sequelize.query(
             `SELECT * FROM nhathuoc WHERE thanhpho LIKE :provinces AND quan LIKE :district`,
             {
@@ -68,6 +68,16 @@ export class PharmacyService {
                 mapToModel: true,
             }
         );
-        return data
+        const result = data.map((pharmacy: Pharmacy) => ({
+            ...pharmacy.toJSON(),
+            diachi: [
+                pharmacy.dataValues.diachicuthe,
+                pharmacy.dataValues.tenduong,
+                pharmacy.dataValues.phuong,
+                pharmacy.dataValues.quan,
+                pharmacy.dataValues.thanhpho
+            ].filter(Boolean).join(', ')
+        }));
+        return result;
     }
 }

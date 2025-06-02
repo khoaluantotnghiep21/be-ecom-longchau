@@ -7,6 +7,8 @@ import {
   Delete,
   Put,
   Query,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/createProduct.dto';
 import { SanPhamService } from './product.service';
@@ -61,16 +63,18 @@ export class SanPhamController {
   async delete(@Param('masanpham') masanpham: string) {
     return await this.sanPhamService.deleteProduct(masanpham);
   }
-
   @Public()
   @Get('search')
+  @ApiQuery({ name: 'query', required: true, type: String, description: 'Search query string' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (optional, default: 1)' })
+  @ApiQuery({ name: 'take', required: false, type: Number, description: 'Items per page (optional, default: 12)' })
   async searchProducts(
     @Query('query') query: string,
     @Query('page') page?: number,
     @Query('take') take?: number,
   ) {
-    if (!query) {
-      throw new Error('Query is required');
+    if (!query || query.trim() === '') {
+      throw new HttpException('Query is required', HttpStatus.BAD_REQUEST);
     }
     // Giải mã query để xử lý tiếng Việt
     const decodedQuery = decodeURIComponent(query);
