@@ -6,15 +6,15 @@ import { UUID } from "crypto";
 import { StatusPurchase } from "src/common/Enum/status-purchase.enum";
 import { OrderDetail } from '../ChiTietDonHang/orderDetail.entity';
 import { OrderDetailsDto } from "./dto/orderDetals.dto";
-import { SanPham } from "../SanPham/product.entity";
+import { IdentityUser } from "../IdentityUser/identityuser.entity";
 
 @Injectable()
 export class PurchaseOrderService {
     constructor(
         @InjectModel(PurchaseOrder)
         private readonly purchaseOrderRepo: Repository<PurchaseOrder>,
-        @InjectModel(SanPham)
-        private readonly productRepo: Repository<SanPham>,
+        @InjectModel(IdentityUser)
+        private readonly userREpo: Repository<IdentityUser>,
         private readonly sequelize: Sequelize,
         
     ) {}
@@ -81,19 +81,25 @@ export class PurchaseOrderService {
         return order;
     }
     async getOrdersByUserId(userid: UUID): Promise<any[]> {
+        const user = await this.userREpo.findOne({where: { id: userid }});
+        if (!user) {
+            throw new NotFoundException(`User with ID ${userid} not found`);
+        }
         const [results] = await this.sequelize.query(
-            `
-            SELECT d.madonhang, i.hoten, s.tensanpham, ct.donvitinh, ct.soluong, ct.giaban, d.thanhtien, d.trangthai 
-            FROM identityuser i , donhang d, chitietdonhang ct, sanpham s 
-            WHERE i.id = d.userid AND d.madonhang = ct.madonhang AND ct.masanpham = s.masanpham AND i.id = :userid    
+            `       
+            select d.madonhang, i.hoten, a.url, s.tensanpham, ct.donvitinh, ct.soluong, ct.giaban, d.thanhtien, d.trangthai 
+            from identityuser i , donhang d, chitietdonhang ct, sanpham s, anhsanpham a 
+            where i.id = d.userid and d.madonhang = ct.madonhang and ct.masanpham = s.masanpham 
+            and a.idsanpham = s.id and a.ismain = true
+            and i.id = :userid
             `,
             {
                 replacements: { userid },
-                raw: true, // Chỉ lấy dữ liệu thuần túy
-                plain: false // Trả về mảng kết quả
+                raw: true,
+                plain: false 
             }
         );
         
-        return results || []; // Đảm bảo luôn trả về mảng
+        return results || []; 
     }
 }

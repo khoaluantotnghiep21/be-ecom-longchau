@@ -4,10 +4,10 @@ import { PurchaseOrder } from './purchaseOrder.entity';
 import { PurchaseOrderService } from './purchaseOrder.service';
 import { PurchaseOrderController } from './purchaseOrder.controller';
 import { AuthGuard } from 'src/guards/auth.guards';
-import { SanPham } from '../SanPham/product.entity';
+import { IdentityUser } from '../IdentityUser/identityuser.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([PurchaseOrder, SanPham])],
+  imports: [SequelizeModule.forFeature([PurchaseOrder, IdentityUser])],
   providers: [PurchaseOrderService ,AuthGuard],
   controllers: [PurchaseOrderController],
   exports: [AuthGuard]
