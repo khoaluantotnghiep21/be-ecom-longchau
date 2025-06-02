@@ -87,11 +87,27 @@ export class PurchaseOrderService {
         }
         const [results] = await this.sequelize.query(
             `       
-            select d.madonhang, i.hoten, a.url, s.tensanpham, ct.donvitinh, ct.soluong, ct.giaban, d.thanhtien, d.trangthai 
-            from identityuser i , donhang d, chitietdonhang ct, sanpham s, anhsanpham a 
-            where i.id = d.userid and d.madonhang = ct.madonhang and ct.masanpham = s.masanpham 
-            and a.idsanpham = s.id and a.ismain = true
-            and i.id = :userid
+           SELECT 
+            d.madonhang, 
+            i.hoten,
+            d.thanhtien,
+            d.trangthai,
+            json_agg(
+                json_build_object(
+                'tensanpham', s.tensanpham,
+                'donvitinh', ct.donvitinh,
+                'soluong', ct.soluong,
+                'giaban', ct.giaban,
+                'url', a.url
+                )
+            ) AS sanpham
+            FROM identityuser i
+            JOIN donhang d ON i.id = d.userid
+            JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
+            JOIN sanpham s ON ct.masanpham = s.masanpham
+            JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
+            WHERE i.id = :userid
+            GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai
             `,
             {
                 replacements: { userid },
