@@ -214,4 +214,16 @@ export class PurchaseOrderController {
   async getAllOrders() {
     return this.purchaseOrderService.getAllOrders();
   }
+
+  @Put('updateStatus/:madonhang')
+  async updateStatus(
+    @Param('madonhang') madonhang: string,
+    @Body('status') status: StatusPurchase
+  ) {
+    if (!madonhang || !status) {
+      throw new NotFoundException('Order ID or status is missing');
+    }
+    return this.purchaseOrderService.updateStatus(madonhang, status);
+  }
+
 }
