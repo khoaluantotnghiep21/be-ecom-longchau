@@ -20,7 +20,7 @@ export class PurchaseOrderController {
   constructor(
     private readonly purchaseOrderService: PurchaseOrderService,
     private readonly configService: ConfigService
-  ) {}
+  ) { }
 
   @Post('createNewPurchaseOrder')
   async createNewPurchaseOrder(@Req() req: Request, @Body() orderDetailsDto: OrderDetailsDto) {
@@ -29,13 +29,13 @@ export class PurchaseOrderController {
       throw new NotFoundException('User ID not found in request');
     }
     const trangthai = StatusPurchase.Confirmed;
-    if(orderDetailsDto.phuongthucthanhtoan === PaymentMethod.BankTransfer){
+    if (orderDetailsDto.phuongthucthanhtoan === PaymentMethod.BankTransfer) {
       const statusPending = StatusPurchase.Pending;
       return this.purchaseOrderService.createNewPurchaseOrder(userid, statusPending, orderDetailsDto);
     }
     return this.purchaseOrderService.createNewPurchaseOrder(userid, trangthai, orderDetailsDto);
   }
-    
+
 
 
   @Post('create-payment-url')
@@ -46,14 +46,14 @@ export class PurchaseOrderController {
         const existingOrder = await this.purchaseOrderService.getOrderByMadonhang(
           payment.madonhang
         );
-        
+
         if (!existingOrder) {
           throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
         }
         console.log(existingOrder.dataValues.trangthai)
         if (existingOrder.dataValues.trangthai !== StatusPurchase.Pending) {
           throw new HttpException(
-            'Order is not in pending status', 
+            'Order is not in pending status',
             HttpStatus.BAD_REQUEST
           );
         }
@@ -75,7 +75,7 @@ export class PurchaseOrderController {
       let locale = 'vn';
       let currCode = 'VND';
       let vnp_Params = {};
-      
+
       vnp_Params['vnp_Version'] = '2.1.0';
       vnp_Params['vnp_Command'] = 'pay';
       vnp_Params['vnp_TmnCode'] = tmnCode;
@@ -144,7 +144,7 @@ export class PurchaseOrderController {
 
       const orderInfo = JSON.parse(payment.vnp_OrderInfo);
 
-      
+
       if (payment.vnp_ResponseCode === '00') {
         await this.purchaseOrderService.updateStatus(
           orderInfo.madonhang,
@@ -207,5 +207,11 @@ export class PurchaseOrderController {
       throw new NotFoundException('User ID not found');
     }
     return this.purchaseOrderService.getOrdersByUserId(userid);
+  }
+
+  @Public()
+  @Get('getAllOrders')
+  async getAllOrders() {
+    return this.purchaseOrderService.getAllOrders();
   }
 }
