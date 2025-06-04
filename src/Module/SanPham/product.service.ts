@@ -29,8 +29,8 @@ export class SanPhamService {
   async createNewProduct(createProductDto: CreateProductDto): Promise<SanPham> {
     const masanpham = 'SP' + randomInt(10000000, 99999999).toString();
     const slug = slugify(createProductDto.tensanpham);
-
-    const data = { ...createProductDto, masanpham, slug };
+    const machuongtrinh = 'CT000';
+    const data = { ...createProductDto, masanpham, slug, machuongtrinh };
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const newProduct = await this.sanPhamModel.create(data as any);
 

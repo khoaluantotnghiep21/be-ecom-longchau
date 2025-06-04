@@ -29,6 +29,5 @@ export class CreateProductDto {
   mathuonghieu: string;
   @ApiProperty()
   madanhmuc: string;
-  @ApiProperty()
-  machuongtrinh: string;
+
 }

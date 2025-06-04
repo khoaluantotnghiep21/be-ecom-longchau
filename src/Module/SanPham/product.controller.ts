@@ -17,6 +17,7 @@ import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from 'src/common/Enum/role.enum';
 import { Public } from 'src/common/decorator/public.decorator';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { UpdateProductDto } from './dto/updateProduct.dto';
 
 @ApiBearerAuth('access-token')
 @ApiTags('Product')
@@ -53,7 +54,7 @@ export class SanPhamController {
   @Put('updateProduct/:masanpham')
   async updateProduct(
     @Param('masanpham') masanpham: string,
-    @Body() updateProductDto: CreateProductDto,
+    @Body() updateProductDto: UpdateProductDto,
   ): Promise<SanPham> {
     return await this.sanPhamService.updateProduct(masanpham, updateProductDto);
   }
