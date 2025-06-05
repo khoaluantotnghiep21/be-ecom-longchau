@@ -118,4 +118,44 @@ export class PurchaseOrderService {
         
         return results || []; 
     }
+
+    async getOrderDetailsByMadonhang(madonhang: string): Promise<any> {
+        const order = await this.purchaseOrderRepo.findOne({where: { madonhang }});
+        if (!order) {
+            throw new NotFoundException(`Order with ID ${madonhang} not found`);
+        }
+
+        const [results] = await this.sequelize.query(
+            `       
+           SELECT 
+            d.madonhang, 
+            i.hoten,
+            d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
+            d.trangthai,
+            json_agg(
+                json_build_object(
+                'tensanpham', s.tensanpham,
+                'donvitinh', ct.donvitinh,
+                'soluong', ct.soluong,
+                'giaban', ct.giaban,
+                'url', a.url
+                )
+            ) AS sanpham
+            FROM identityuser i
+            JOIN donhang d ON i.id = d.userid
+            JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
+            JOIN sanpham s ON ct.masanpham = s.masanpham
+            JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
+            WHERE d.madonhang = :madonhang
+            GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang
+            `,
+            {
+                replacements: { madonhang },
+                raw: true,
+                plain: false 
+            }
+        );
+
+        return results;
+    }
 }

@@ -208,4 +208,13 @@ export class PurchaseOrderController {
     }
     return this.purchaseOrderService.getOrdersByUserId(userid);
   }
+
+  @Public()
+  @Get('getOrderByMadonhang/:madonhang')
+  async getOrderByMadonhang(@Param('madonhang') madonhang: string) {
+    if (!madonhang) {
+      throw new NotFoundException('Order ID not found');
+    }
+    return this.purchaseOrderService.getOrderDetailsByMadonhang(madonhang);
+  }
 }
