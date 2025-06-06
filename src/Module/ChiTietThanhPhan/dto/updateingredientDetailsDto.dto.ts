@@ -4,7 +4,7 @@ import { IsInt, IsNotEmpty } from "class-validator";
 export class UpdateIngredientDetailsDto{
     @ApiProperty()
     @IsNotEmpty()
-    madonvitinh: string;
+    mathanhphan: string;
 
     @ApiProperty()
     @IsInt()
