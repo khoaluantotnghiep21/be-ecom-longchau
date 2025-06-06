@@ -6,8 +6,8 @@ import { UnitDetals } from "./chitietdonvitinh.entity";
 import { UpdateUnitDetalsDto } from "./dto/updatechitietdonvitinh.dto";
 import { ApiTags } from "@nestjs/swagger";
 
-@ApiTags('UnitDetals')
-@Controller('unitDetalsController')
+@ApiTags('UnitDetails')
+@Controller('unitDetailsController')
 export class UnitDetalsController{
     constructor(
         private readonly unitDetalsService: UnitDetalsSerive
