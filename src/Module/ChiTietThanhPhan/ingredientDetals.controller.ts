@@ -19,9 +19,8 @@ export class IngredientDetailsController{
 
     @Public()
     @Put('updateIngredientDetalsForProduct/:masanpham/:mathanhphan')
-    async updateIngredientDetalsForProduct(@Param('masanpham') masanpham: string, @Param('mathanhphan') mathanhphan: string, @Body() updateIngredientDetailsDto: UpdateIngredientDetailsDto): Promise<boolean>{
-        await this.ingredientDetalsService.updateIngredientDetalsForProduct(masanpham, mathanhphan, updateIngredientDetailsDto)
+    async updateIngredientDetailsForProduct(@Param('masanpham') masanpham: string, @Param('mathanhphan') mathanhphan: string, @Body() updateIngredientDetailsDto: UpdateIngredientDetailsDto): Promise<boolean>{
+        await this.ingredientDetalsService.updateIngredientDetailsForProduct(masanpham, mathanhphan, updateIngredientDetailsDto)
         return true;
     }
-
 }

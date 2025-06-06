@@ -32,7 +32,7 @@ export class IngredientDetalsService{
         return true
     }
 
-    async updateIngredientDetalsForProduct(masanpham: string, mathanhphan: string, updateIngredientDetailsDto: UpdateIngredientDetailsDto): Promise<boolean>{
+    async updateIngredientDetailsForProduct(masanpham: string, mathanhphan: string, updateIngredientDetailsDto: UpdateIngredientDetailsDto): Promise<boolean>{
         
         const ingredientDetals = await this.ingredientDetalsRepo.findOne({where:{masanpham, mathanhphan}})
         if(!ingredientDetals){
