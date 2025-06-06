@@ -11,14 +11,14 @@ export class IngredientDetailsController{
     ){}
 
     @Public()
-    @Post('addIngredientDetalsForProduct/:masanpham/:mathanhphan')
-    async addIngredientDetalsForProduct(@Param('masanpham') masanpham: string, @Param('mathanhphan') mathanhphan: string, @Body() ingredientDetailsDto: IngredientDetailsDto): Promise<boolean>{
+    @Post('addIngredientDetailsForProduct/:masanpham/:mathanhphan')
+    async addIngredientDetailsForProduct(@Param('masanpham') masanpham: string, @Param('mathanhphan') mathanhphan: string, @Body() ingredientDetailsDto: IngredientDetailsDto): Promise<boolean>{
         await this.ingredientDetalsService.addIngredientDetalsForProduct(masanpham, mathanhphan, ingredientDetailsDto)
         return true;
     }
 
     @Public()
-    @Put('updateIngredientDetalsForProduct/:masanpham/:mathanhphan')
+    @Put('updateIngredientDetailsForProduct/:masanpham/:mathanhphan')
     async updateIngredientDetailsForProduct(@Param('masanpham') masanpham: string, @Param('mathanhphan') mathanhphan: string, @Body() updateIngredientDetailsDto: UpdateIngredientDetailsDto): Promise<boolean>{
         await this.ingredientDetalsService.updateIngredientDetailsForProduct(masanpham, mathanhphan, updateIngredientDetailsDto)
         return true;
