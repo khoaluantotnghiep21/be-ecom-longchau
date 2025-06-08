@@ -163,6 +163,8 @@ export class PurchaseOrderService {
            SELECT 
             d.madonhang, 
             i.hoten,
+            i.sodienthoai,
+            i.diachi,
             d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
             d.trangthai,
             json_agg(
@@ -180,7 +182,7 @@ export class PurchaseOrderService {
             JOIN sanpham s ON ct.masanpham = s.masanpham
             JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
             WHERE d.madonhang = :madonhang
-            GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang
+            GROUP BY d.madonhang, i.hoten, i.sodienthoai, i.diachi, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang
             `,
             {
                 replacements: { madonhang },
