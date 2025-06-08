@@ -11,7 +11,7 @@ import { UpdateIdentityUserDto } from './dto/updateIdentityUser.dto';
 @ApiTags('IdentityUser')
 @Controller('identityuser')
 export class IdentityUserController {
-  constructor(private readonly identityUserService: IdentityUserService) {}
+  constructor(private readonly identityUserService: IdentityUserService) { }
 
   @Public()
   @Post('createAccount')
@@ -64,10 +64,26 @@ export class IdentityUserController {
   }
 
   @Get('getUserInfo')
-    getUserInfo(@Req() req: Request) {
+  getUserInfo(@Req() req: Request) {
     const user = req['user'];
     return {
       userId: user?.sub,
     };
+
+
+  }
+  @Get('all')
+  async getAllUsers() {
+    return this.identityUserService.getAllUsers();
+  }
+
+  @Put('change-password/:sodienthoai')
+async changePassword(
+  @Param('sodienthoai') sodienthoai: string,
+  @Body('oldPassword') oldPassword: string,
+  @Body('newPassword') newPassword: string
+) {
+  return this.identityUserService.changePassword(sodienthoai, oldPassword, newPassword);
 }
+
 }

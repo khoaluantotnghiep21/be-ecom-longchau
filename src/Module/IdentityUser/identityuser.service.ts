@@ -25,7 +25,29 @@ export class IdentityUserService {
     const user = await this.identityUserRepo.findOne({
       where: { sodienthoai: phoneNumber },
     });
-    return !!user; 
+    return !!user;
+  }
+
+  async getAllUsers(): Promise<IdentityUser[]> {
+    return this.identityUserRepo.findAll({
+      attributes: { exclude: ['matkhau'] },
+    });
+  }
+
+  async changePassword(sodienthoai: string, oldPassword: string, newPassword: string): Promise<{ message: string }> {
+    const user = await this.identityUserRepo.findOne({ where: { sodienthoai } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const isMatch = await bcrypt.compare(oldPassword, user.matkhau);
+    if (!isMatch) {
+      throw new NotFoundException('Old password is incorrect');
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.matkhau = hashedPassword;
+    await user.save();
+    return { message: 'Password changed successfully' };
   }
 
   async getUserByPhoneNumber(phoneNumber: string) {
