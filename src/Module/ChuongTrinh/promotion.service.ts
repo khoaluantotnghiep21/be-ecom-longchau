@@ -186,4 +186,38 @@ export class PromotionService{
       message: `Delete ${masanpham} with ${promotion.dataValues.tenchuongtrinh}`,
     };
   }
+  async findProductWithNoPromotion(): Promise<any[]>{
+    const products = await this.sanPhamRepo.findAll({
+      where: { machuongtrinh: 'CT000' },
+      include: [
+        { model: DanhMuc, attributes: ['tendanhmuc'] },
+        { model: ThuongHieu, attributes: ['tenthuonghieu'] },
+        { model: Media, attributes: ['url', 'ismain'] },
+        {
+          model: UnitDetals,
+          as: 'chitietdonvi',
+          attributes: ['dinhluong', 'giaban'],
+          include: [{ model: Unit, attributes: ['donvitinh'] }],
+        },
+        {
+          model: IngredientDetals,
+          attributes: ['hamluong'],
+          include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
+        },
+      ],
+      raw: false,
+      nest: true,
+    });
+
+    return products.map((rawProduct: any) => {
+      const product = rawProduct.get ? rawProduct.get({ plain: true }) : rawProduct;
+      if (product.chitietdonvi && Array.isArray(product.chitietdonvi)) {
+        product.chitietdonvi = product.chitietdonvi.map((donvi: any) => ({
+          ...donvi,
+          giabanSauKhuyenMai: donvi.giaban,
+        }));
+      }
+      return product;
+    });
+  }
 }

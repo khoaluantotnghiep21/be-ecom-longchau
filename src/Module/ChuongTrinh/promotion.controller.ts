@@ -77,4 +77,11 @@ export class PromotionController {
     ) {
         return await this.promotionService.deleteProductFromPromotion(machuongtrinh, masanpham);
     }
+
+    @Public()
+    @Get('getProductWithNoPromotion')
+    @ApiOperation({ summary: 'Lấy danh sách sản phẩm không có chương trình khuyến mãi' })
+    async getProductWithNoPromotion() {
+        return await this.promotionService.findProductWithNoPromotion();
+    }
 }
