@@ -29,6 +29,7 @@ import { VoucherModule } from './Module/Voucher/voucher.module';
 import { PharmacyModule } from './Module/NhaThuoc/pharmacy.module';
 import { PurchaseOrderModule } from './Module/DonHang/purchaseOrder.module';
 import { OrderDetailModule } from './Module/ChiTietDonHang/orderDetail.module';
+import { DeliveryModule } from './Module/GiaoHang/delivery.module';
 
 @Module({
   imports: [
@@ -64,11 +65,11 @@ import { OrderDetailModule } from './Module/ChiTietDonHang/orderDetail.module';
     PromotionModule,
     LoaiModule,
     IngredientModule,
-    IngredientDetalsModule,
-    VoucherModule,
+    IngredientDetalsModule,    VoucherModule,
     PharmacyModule,
     PurchaseOrderModule,
-    OrderDetailModule
+    OrderDetailModule,
+    DeliveryModule
   ],
   controllers: [AppController],
   providers: [

@@ -9,7 +9,7 @@ import { Roles } from "src/common/decorator/roles.decorator";
 import { Role } from "src/common/Enum/role.enum";
 
 @ApiTags('Promotion')
-@Controller('promition')
+@Controller('promotion')
 export class PromotionController {
     constructor(
         private readonly promotionService: PromotionService
