@@ -167,15 +167,15 @@ export class PromotionService{
     });
   }
 
-  async deleteProductFromPromotion(machuongtrinh: string, productId: string): Promise<{ success: boolean; message: string }> {
+  async deleteProductFromPromotion(machuongtrinh: string, masanpham: string): Promise<{ success: boolean; message: string }> {
     const promotion = await this.promotionRepo.findOne({ where: { machuongtrinh } });
     if (!promotion) {
       throw new NotFoundException(`Not found promotion with ${machuongtrinh}`);
     }
 
-    const product = await this.sanPhamRepo.findOne({ where: { id: productId, machuongtrinh } });
+    const product = await this.sanPhamRepo.findOne({ where: {masanpham, machuongtrinh } });
     if (!product) {
-      throw new NotFoundException(`Not found productId with ${productId} in Promotion ${promotion.dataValues.tenchuongtrinh}`);
+      throw new NotFoundException(`Not found productId with ${masanpham} in Promotion ${promotion.dataValues.tenchuongtrinh}`);
     }
 
     product.set({ machuongtrinh: 'CT000' });
@@ -183,7 +183,7 @@ export class PromotionService{
 
     return {
       success: true,
-      message: `Delete ${productId} with ${promotion.dataValues.tenchuongtrinh}`,
+      message: `Delete ${masanpham} with ${promotion.dataValues.tenchuongtrinh}`,
     };
   }
 }
