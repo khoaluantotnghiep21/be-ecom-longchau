@@ -9,10 +9,11 @@ import {
   NotFoundException,
   HttpException,
   HttpStatus,
+  Put,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { PurchaseOrderService } from './purchaseOrder.service';
 import { OrderDetailsDto } from './dto/orderDetals.dto';
@@ -25,6 +26,7 @@ import { PurchaseOrder } from './purchaseOrder.entity';
 
 import * as dayjs from 'dayjs';
 import { UUID } from 'crypto';
+import { UpdateStatusDto } from './dto/updateStatusDto';
 
 @ApiBearerAuth('access-token')
 
@@ -373,4 +375,16 @@ export class PurchaseOrderController {
   async getAllOrders() {
     return this.purchaseOrderService.getAllOrders();
   }
+
+@Put('updateStatus/:madonhang')
+@ApiBody({ type: UpdateStatusDto })
+async updateOrderStatus(
+  @Param('madonhang') madonhang: string,
+  @Body() body: UpdateStatusDto
+) {
+  if (!madonhang || !body.status) {
+    throw new HttpException('Order ID or status is missing', HttpStatus.BAD_REQUEST);
+  }
+  return this.purchaseOrderService.updateStatus(madonhang, body.status);
+}
 }
