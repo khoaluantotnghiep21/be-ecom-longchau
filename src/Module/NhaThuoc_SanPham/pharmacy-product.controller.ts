@@ -1,0 +1,151 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Request,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { PharmacyProductService } from './pharmacy-product.service';
+import { PharmacyProductDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
+import { Roles } from 'src/common/decorator/roles.decorator';
+import { Role } from 'src/common/Enum/role.enum';
+import { Public } from 'src/common/decorator/public.decorator';
+import { NhaThuoc_SanPham } from './pharmacy-product.entity';
+import { MultiProductsDto } from './dto/multi-products.dto';
+import { SimpleProductInputDto } from './dto/simple-product-input.dto';
+
+@ApiTags('PharmacyProduct')
+@Controller('pharmacy-product')
+@ApiBearerAuth('access-token')
+export class PharmacyProductController {
+  constructor(private readonly pharmacyProductService: PharmacyProductService) {}
+
+//   @Post('createNewOrder')
+//   @ApiOperation({ summary: 'Thêm sản phẩm vào nhà thuốc' })
+//   @ApiBody({ type: PharmacyProductDto })
+//   async createPharmacyProduct(
+//     @Body() pharmacyProductDto: PharmacyProductDto,
+//     @Request() req
+//   ): Promise<NhaThuoc_SanPham> {
+//     const userid = req['user']?.sub;
+//     return await this.pharmacyProductService.createPharmacyProduct(pharmacyProductDto, userid);
+//   }
+  
+  @Post('createMultipleProducts')
+  @ApiOperation({ summary: 'Thêm nhiều sản phẩm vào nhà thuốc với cùng mã chi nhánh' })
+  @ApiBody({ type: MultiProductsDto })
+  async createMultipleProducts(
+    @Body() multiProductsDto: MultiProductsDto,
+    @Request() req
+  ) {
+    const userid = req['user']?.sub;
+    return await this.pharmacyProductService.createMultipleProducts(multiProductsDto, userid);
+  }
+
+  @Post('createSimpleInput')
+  @ApiOperation({ summary: 'Thêm nhiều sản phẩm vào nhà thuốc với mảng mã sản phẩm và số lượng riêng biệt' })
+  @ApiBody({ type: SimpleProductInputDto })
+  async createFromSimpleInput(
+    @Body() simpleInputDto: SimpleProductInputDto,
+    @Request() req
+  ) {
+    const userid = req['user']?.sub;
+    return await this.pharmacyProductService.createFromSimpleInput(simpleInputDto, userid);
+  }
+
+  @Get('getIdPharmacyProductById:id')
+  @Public()
+  @ApiOperation({ summary: 'Lấy thông tin sản phẩm nhà thuốc theo ID' })
+  @ApiParam({ name: 'id', description: 'ID của thông tin sản phẩm nhà thuốc' })
+  async getPharmacyProductById(@Param('id') id: string): Promise<NhaThuoc_SanPham> {
+    return await this.pharmacyProductService.getPharmacyProductById(id);
+  }
+
+  @Get('getListPharmacyProducts')
+  @Public()
+  @ApiOperation({ summary: 'Lấy tất cả sản phẩm nhà thuốc' })
+
+  async getAllPharmacyProducts(): Promise<any[]> {
+    return await this.pharmacyProductService.getAllPharmacyProducts();
+  }
+
+  @Get('getListProductInPharmacy/:machinhanh')
+  @Public()
+  @ApiOperation({ summary: 'Lấy danh sách sản phẩm của một chi nhánh nhà thuốc' })
+  @ApiParam({ name: 'machinhanh', description: 'Mã chi nhánh nhà thuốc' })
+
+  async getProductsByBranch(
+    @Param('machinhanh') machinhanh: string,
+  ): Promise<any[]> {
+    return await this.pharmacyProductService.getProductsByBranch(machinhanh);
+  }
+
+  @Put('updateInfoPharmacyProduct:id')
+  @ApiOperation({ summary: 'Cập nhật thông tin sản phẩm nhà thuốc' })
+  @ApiParam({ name: 'id', description: 'ID của thông tin sản phẩm nhà thuốc' })
+  @ApiBody({ type: UpdatePharmacyProductDto })
+  async updatePharmacyProduct(
+    @Param('id') id: string,
+    @Body() updatePharmacyProductDto: UpdatePharmacyProductDto,
+    @Request() req
+  ): Promise<NhaThuoc_SanPham> {
+    // Lấy ID của user đang đăng nhập từ request
+    const userid = req['user']?.sub;
+    return await this.pharmacyProductService.updatePharmacyProduct(id, updatePharmacyProductDto, userid);
+  }
+
+  @Put('updateStatus/:id')
+  @ApiOperation({ summary: 'Cập nhật tình trạng sản phẩm nhà thuốc' })
+  @ApiParam({ name: 'id', description: 'ID của thông tin sản phẩm nhà thuốc' })
+  @ApiQuery({ name: 'tinhtrang', description: 'Tình trạng mới' })
+
+  async updateProductStatus(
+    @Param('id') id: string,
+    @Query('tinhtrang') tinhtrang: string,
+    @Request() req
+  ): Promise<NhaThuoc_SanPham> {
+
+    const userid = req['user']?.sub;
+    return await this.pharmacyProductService.updateProductStatus(id, tinhtrang, userid);
+  }
+
+  @Delete('deletePharmacyProduct:id')
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Xóa thông tin sản phẩm nhà thuốc' })
+  @ApiParam({ name: 'id', description: 'ID của thông tin sản phẩm nhà thuốc' })
+  @ApiResponse({ status: 200, description: 'Xóa thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy thông tin sản phẩm nhà thuốc' })
+  async deletePharmacyProduct(@Param('id') id: string): Promise<{ success: boolean; message: string }> {
+    return await this.pharmacyProductService.deletePharmacyProduct(id);
+  }
+
+  @Get('search/:term')
+  @Public()
+  @ApiOperation({ summary: 'Tìm kiếm sản phẩm nhà thuốc' })
+  @ApiParam({ name: 'term', description: 'Từ khóa tìm kiếm' })
+  @ApiResponse({ status: 200, description: 'Thành công' })
+  async searchPharmacyProducts(@Param('term') term: string): Promise<any[]> {
+    return await this.pharmacyProductService.searchPharmacyProducts(term);
+  }
+
+  @Get('checkProduct/:masanpham')
+  @Public()
+  @ApiOperation({ summary: 'Kiểm tra sản phẩm tồn tại trong cơ sở dữ liệu' })
+  @ApiParam({ name: 'masanpham', description: 'Mã sản phẩm cần kiểm tra' })
+  async checkProduct(@Param('masanpham') masanpham: string) {
+    return await this.pharmacyProductService.checkProduct(masanpham);
+  }
+}
