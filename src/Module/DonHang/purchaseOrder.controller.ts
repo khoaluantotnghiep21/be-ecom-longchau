@@ -130,68 +130,68 @@ export class PurchaseOrderController {
 
   @Public()
   @Get('vnpay-return')
-async handleVnpayReturn(@Req() req: Request, @Res() res: Response) {
-  try {
-    const queryParams = req.query;
+  async handleVnpayReturn(@Req() req: Request, @Res() res: Response) {
+    try {
+      const queryParams = req.query;
 
-    const secureHash = queryParams['vnp_SecureHash'];
-    const { vnp_SecureHash, vnp_SecureHashType, ...restParams } = queryParams;
+      const secureHash = queryParams['vnp_SecureHash'];
+      const { vnp_SecureHash, vnp_SecureHashType, ...restParams } = queryParams;
 
-    const sortedParams = this.sortObject(restParams);
-    const secretKey = this.configService.get<string>('VNP_HASH_SECRET');
+      const sortedParams = this.sortObject(restParams);
+      const secretKey = this.configService.get<string>('VNP_HASH_SECRET');
 
-    const querystring = require('qs');
-    const signData = querystring.stringify(sortedParams, { encode: false });
+      const querystring = require('qs');
+      const signData = querystring.stringify(sortedParams, { encode: false });
 
-    const crypto = require('crypto');
-    const hmac = crypto.createHmac('sha512', secretKey);
-    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+      const crypto = require('crypto');
+      const hmac = crypto.createHmac('sha512', secretKey);
+      const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
 
-    if (secureHash !== signed) {
+      if (secureHash !== signed) {
+        return res.redirect(
+          ``
+        );
+      }
+
+      const rawOrderInfo = queryParams['vnp_OrderInfo'];
+      if (typeof rawOrderInfo !== 'string') {
+        throw new HttpException('Invalid vnp_OrderInfo', HttpStatus.BAD_REQUEST);
+      }
+      const orderInfo = JSON.parse(rawOrderInfo);
+
+      if (queryParams['vnp_ResponseCode'] === '00') {
+        await this.purchaseOrderService.updateStatus(
+          orderInfo.madonhang,
+          StatusPurchase.Confirmed
+        );
+
+      } else {
+        await this.purchaseOrderService.updateStatus(
+          orderInfo.madonhang,
+          StatusPurchase.Cancelled
+        );
+
+      }
+      let url = this.configService.get<string>('VNP_RETURN_URL_WEB')
       return res.redirect(
-        ``
+        `${url}?madonhang=${orderInfo.madonhang}`
       );
-    }
-
-    const rawOrderInfo = queryParams['vnp_OrderInfo'];
-    if (typeof rawOrderInfo !== 'string') {
-      throw new HttpException('Invalid vnp_OrderInfo', HttpStatus.BAD_REQUEST);
-    }
-    const orderInfo = JSON.parse(rawOrderInfo);
-
-    if (queryParams['vnp_ResponseCode'] === '00') {
-      await this.purchaseOrderService.updateStatus(
-        orderInfo.madonhang,
-        StatusPurchase.Confirmed
-      );
-
-    } else {
-      await this.purchaseOrderService.updateStatus(
-        orderInfo.madonhang,
-        StatusPurchase.Cancelled
+    } catch (error) {
+      console.error('VNPay return error:', error);
+      let url = this.configService.get<string>('VNP_RETURN_URL_WEB')
+      return res.redirect(
+        `${url}?madonhang=null`
       );
 
     }
-    let url = this.configService.get<string>('VNP_RETURN_URL_WEB')
-    return res.redirect(
-      `${url}?madonhang=${orderInfo.madonhang}`
-    );
-  } catch (error) {
-    console.error('VNPay return error:', error);
-    let url = this.configService.get<string>('VNP_RETURN_URL_WEB')
-    return res.redirect(
-      `${url}?madonhang=null`
-    );
-
   }
-}
 
   @Get('create-payment-url/web/:madonhang')
   async createPaymentUrlWeb(@Param('madonhang') madonhang: string, @Req() req: Request) {
     try {
       let existingOrder = {} as PurchaseOrder;
       // Kiểm tra đơn hàng tồn tại
-    
+
       if (madonhang) {
         existingOrder = await this.purchaseOrderService.getOrderByMadonhang(
           madonhang
@@ -208,7 +208,7 @@ async handleVnpayReturn(@Req() req: Request, @Res() res: Response) {
           );
         }
       }
-      const ipAddr = req.ip || '127.0.0.1'; 
+      const ipAddr = req.ip || '127.0.0.1';
       let tmnCode = this.configService.get<string>('VNP_TMN_CODE');
       let secretKey = this.configService.get<string>('VNP_HASH_SECRET');
       let vnpUrl = this.configService.get<string>('VNP_URL');
@@ -366,5 +366,11 @@ async handleVnpayReturn(@Req() req: Request, @Res() res: Response) {
       throw new NotFoundException('Order ID not found');
     }
     return this.purchaseOrderService.getOrderDetailsByMadonhang(madonhang);
+  }
+
+  @Public()
+  @Get('getAllOrders')
+  async getAllOrders() {
+    return this.purchaseOrderService.getAllOrders();
   }
 }
