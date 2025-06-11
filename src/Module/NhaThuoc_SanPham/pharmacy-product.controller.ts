@@ -19,7 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PharmacyProductService } from './pharmacy-product.service';
-import { PharmacyProductDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
+import { PharmacyProductDto, StatusDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from 'src/common/Enum/role.enum';
 import { Public } from 'src/common/decorator/public.decorator';
@@ -78,7 +78,9 @@ export class PharmacyProductController {
   @Public()
   @ApiOperation({ summary: 'Lấy tất cả sản phẩm nhà thuốc' })
 
-  async getAllPharmacyProducts(): Promise<any[]> {
+  async getAllPharmacyProducts(
+  ): Promise<any> {
+
     return await this.pharmacyProductService.getAllPharmacyProducts();
   }
 
@@ -107,19 +109,16 @@ export class PharmacyProductController {
     return await this.pharmacyProductService.updatePharmacyProduct(id, updatePharmacyProductDto, userid);
   }
 
-  @Put('updateStatus/:id')
+  @Put('updateStatus/:manhaphang')
   @ApiOperation({ summary: 'Cập nhật tình trạng sản phẩm nhà thuốc' })
-  @ApiParam({ name: 'id', description: 'ID của thông tin sản phẩm nhà thuốc' })
-  @ApiQuery({ name: 'tinhtrang', description: 'Tình trạng mới' })
+  @ApiParam({ name: 'manhaphang', description: 'Mã Nhập hàng của thông tin sản phẩm nhà thuốc' })
 
   async updateProductStatus(
-    @Param('id') id: string,
-    @Query('tinhtrang') tinhtrang: string,
-    @Request() req
-  ): Promise<NhaThuoc_SanPham> {
+    @Param('manhaphang') manhaphang: string, @Body()
+    statusDto: StatusDto
+  ): Promise<NhaThuoc_SanPham[]> {
 
-    const userid = req['user']?.sub;
-    return await this.pharmacyProductService.updateProductStatus(id, tinhtrang, userid);
+    return await this.pharmacyProductService.updateProductStatus(manhaphang, statusDto);
   }
 
   @Delete('deletePharmacyProduct:id')

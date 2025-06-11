@@ -26,7 +26,14 @@ export class PharmacyProductDto {
   @IsNumber()
   soluong: number;
 
-  
+  @ApiProperty({
+    description: 'Mã nhập hàng (được sinh tự động)',
+    example: 'NH-20250611-1234',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  manhaphang?: string;
 }
 
 export class UpdatePharmacyProductDto {
@@ -49,6 +56,15 @@ export class UpdatePharmacyProductDto {
   masanpham?: string;
 
   @ApiProperty({
+    description: 'Mã nhập hàng',
+    example: 'NH-20250611-1234',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  manhaphang?: string;
+
+  @ApiProperty({
     description: 'Số lượng sản phẩm',
     example: 100,
     required: false
@@ -65,4 +81,14 @@ export class UpdatePharmacyProductDto {
   @IsOptional()
   @IsString()
   tinhtrang?: string;
+}
+
+export class StatusDto{
+  @ApiProperty({
+    description: 'Tình trạng sản phẩm',
+    example: 'Xác nhận đơn hàng',
+  })
+  @IsNotEmpty({ message: 'Tình trạng không được để trống' })
+  @IsString()
+  tinhtrang: string;
 }

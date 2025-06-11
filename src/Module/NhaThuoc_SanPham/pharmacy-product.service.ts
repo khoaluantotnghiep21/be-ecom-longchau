@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/sequelize';
 import { NhaThuoc_SanPham } from './pharmacy-product.entity';
 import { SanPham } from '../SanPham/product.entity';
-import { PharmacyProductDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
+import { PharmacyProductDto, StatusDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
 import { IdentityUser } from '../IdentityUser/identityuser.entity';
 import { QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
@@ -55,6 +55,7 @@ export class PharmacyProductService {
     // Tạo mới thông tin sản phẩm nhà thuốc
     return await this.pharmacyProductModel.create({
       ...pharmacyProductDto,
+      manhaphang: this.generateImportCode(),
       userid,
       ngaygui: new Date(),
       tinhtrang: 'Chưa duyệt', 
@@ -76,17 +77,31 @@ export class PharmacyProductService {
 
   /**
    * Lấy tất cả sản phẩm nhà thuốc
-   * @returns Danh sách sản phẩm nhà thuốc
+   * @returns Danh sách sản phẩm nhà thuốc, có thể được nhóm theo lô
    */
   async getAllPharmacyProducts(): Promise<any[]> {
     const result = await this.sequelize.query(
       `
-      SELECT nsp.*, sp.tensanpham, u.hoten 
+      SELECT 
+      nsp.manhaphang,
+      nsp.ngaygui,
+      nsp.tinhtrang,
+      u.hoten AS nguoi_gui,
+      JSON_AGG(
+        JSON_BUILD_OBJECT(
+          'machinhanh', nsp.machinhanh,
+          'masanpham', nsp.masanpham,
+          'soluong', nsp.soluong,
+          'tensanpham', sp.tensanpham
+        )
+      ) AS danhsach_sanpham
       FROM nhathuoc_sanpham nsp
       JOIN sanpham sp ON nsp.masanpham = sp.masanpham
       JOIN identityuser u ON nsp.userid = u.id
-      ORDER BY nsp.ngaygui DESC
-      `,
+      GROUP BY nsp.manhaphang, nsp.ngaygui, nsp.tinhtrang, u.hoten
+      ORDER BY nsp.ngaygui DESC;
+          `
+      ,
       {
         type: QueryTypes.SELECT,
       }
@@ -100,10 +115,15 @@ export class PharmacyProductService {
    * @param machinhanh Mã chi nhánh nhà thuốc
    * @returns Danh sách sản phẩm của chi nhánh
    */
-  async getProductsByBranch(machinhanh: string): Promise<any[]> {
+  async getProductsByBranch(machinhanh: string): Promise<any> {
     const result = await this.sequelize.query(
       `
-      SELECT nsp.*, sp.tensanpham, u.hoten as nguoicapnhat
+      SELECT 
+        nsp.*, 
+        sp.masanpham, 
+        sp.tensanpham,
+        u.hoten as nguoicapnhat,
+        u.email as email_nguoi_capnhat
       FROM nhathuoc_sanpham nsp
       JOIN sanpham sp ON nsp.masanpham = sp.masanpham
       JOIN identityuser u ON nsp.userid = u.id
@@ -116,7 +136,12 @@ export class PharmacyProductService {
       }
     );
     
-    return result;
+    return {
+      success: true,
+      data: result,
+      totalProducts: result.length,
+      message: `Đã tìm thấy ${result.length} sản phẩm trong chi nhánh ${machinhanh}`
+    };
   }
 
   /**
@@ -201,24 +226,21 @@ export class PharmacyProductService {
    * @returns Thông tin sản phẩm nhà thuốc đã cập nhật
    */
   async updateProductStatus(
-    id: string,
-    tinhtrang: string,
-    userid: string,
-  ): Promise<NhaThuoc_SanPham> {
-    const pharmacyProduct = await this.pharmacyProductModel.findByPk(id);
-    if (!pharmacyProduct) {
-      throw new NotFoundException(`Không tìm thấy thông tin sản phẩm nhà thuốc với ID ${id}`);
+    manhaphang: string,
+    statusDto: StatusDto
+  ): Promise<NhaThuoc_SanPham[]> {
+    const [affectedRows] = await this.pharmacyProductModel.update(
+      { ...statusDto },
+      { where: { manhaphang } }
+    );
+
+    if (affectedRows === 0) {
+      throw new NotFoundException(`Không tìm thấy sản phẩm với mã nhập hàng ${manhaphang}`);
     }
-    
-    // Cập nhật tình trạng
-    await pharmacyProduct.update({
-      tinhtrang,
-      userid, 
-      ngaygui: new Date(), // Cập nhật ngày cập nhật
-    });
-    
-    return pharmacyProduct;
+
+    return await this.pharmacyProductModel.findAll({ where: { manhaphang } });
   }
+
 
   /**
    * Thêm nhiều sản phẩm vào nhà thuốc sử dụng danh sách sản phẩm và số lượng
@@ -232,6 +254,7 @@ export class PharmacyProductService {
   ): Promise<{
     success: boolean;
     message: string;
+    manhaphang: string;
     totalProducts: number;
     createdProducts: number;
     updatedProducts: number;
@@ -244,10 +267,14 @@ export class PharmacyProductService {
   }> {
     const { machinhanh, products } = multiProductsDto;
 
+    // Tạo một mã nhập hàng duy nhất cho toàn bộ lô
+    const batchImportCode = this.generateImportCode();
+
     // Kết quả thực hiện
     const result = {
       success: true,
       message: '',
+      manhaphang: batchImportCode, // Thêm mã nhập hàng vào kết quả
       totalProducts: products.length,
       createdProducts: 0,
       updatedProducts: 0,
@@ -362,6 +389,7 @@ export class PharmacyProductService {
               machinhanh: machinhanh,
               masanpham: product.masanpham,
               soluong: product.soluong,
+              manhaphang: batchImportCode, // Sử dụng cùng một mã nhập hàng cho toàn bộ lô
               userid,
               ngaygui: new Date(),
               tinhtrang: 'Chưa duyệt',
@@ -381,7 +409,7 @@ export class PharmacyProductService {
     );
 
     // Tạo thông báo tổng hợp
-    result.message = `Đã xử lý ${result.totalProducts} sản phẩm: ${result.createdProducts} mới, ${result.updatedProducts} cập nhật, ${result.failedProducts} thất bại.`;
+    result.message = `Đã xử lý ${result.totalProducts} sản phẩm trong lô ${batchImportCode}: ${result.createdProducts} mới, ${result.updatedProducts} cập nhật, ${result.failedProducts} thất bại.`;
     result.success = result.failedProducts < result.totalProducts; // Thành công nếu ít nhất 1 sản phẩm được xử lý
     
     return result;
@@ -399,6 +427,7 @@ export class PharmacyProductService {
   ): Promise<{
     success: boolean;
     message: string;
+    manhaphang: string;
     totalProducts: number;
     createdProducts: number;
     updatedProducts: number;
@@ -416,10 +445,15 @@ export class PharmacyProductService {
       throw new BadRequestException('Mảng mã sản phẩm và số lượng phải có cùng độ dài');
     }
 
+    // Tạo một mã nhập hàng duy nhất cho toàn bộ lô
+    const batchImportCode = this.generateImportCode();
+    console.log(`Tạo mã nhập hàng cho lô: ${batchImportCode}`);
+
     // Kết quả thực hiện
     const result = {
       success: true,
       message: '',
+      manhaphang: batchImportCode, // Thêm mã nhập hàng vào kết quả
       totalProducts: masanpham.length,
       createdProducts: 0,
       updatedProducts: 0,
@@ -481,6 +515,7 @@ export class PharmacyProductService {
               machinhanh,
               masanpham: msp,
               soluong: sl,
+              manhaphang: batchImportCode, // Sử dụng cùng một mã nhập hàng cho toàn bộ lô
               userid,
               ngaygui: new Date(),
               tinhtrang: 'Chưa duyệt',
@@ -501,7 +536,7 @@ export class PharmacyProductService {
     );
 
     // Tạo thông báo tổng hợp
-    result.message = `Đã xử lý ${result.totalProducts} sản phẩm: ${result.createdProducts} mới, ${result.updatedProducts} cập nhật, ${result.failedProducts} thất bại.`;
+    result.message = `Đã xử lý ${result.totalProducts} sản phẩm trong lô ${batchImportCode}: ${result.createdProducts} mới, ${result.updatedProducts} cập nhật, ${result.failedProducts} thất bại.`;
     result.success = result.failedProducts < result.totalProducts; // Thành công nếu ít nhất 1 sản phẩm được xử lý
     
     return result;
@@ -544,5 +579,24 @@ export class PharmacyProductService {
       similarMatches: similarMatches.map(p => ({ id: p.id, masanpham: p.masanpham, tensanpham: p.tensanpham })),
       sampleProducts: allProducts.map(p => p.masanpham)
     };
+  }
+
+  /**
+   * Tạo mã nhập hàng ngẫu nhiên
+   * @returns Mã nhập hàng định dạng NH-YYYYMMDD-XXXX
+   */
+  private generateImportCode(): string {
+    // Lấy ngày hiện tại để tạo định dạng YYYYMMDD
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}${month}${day}`;
+    
+    // Tạo số ngẫu nhiên 4 chữ số
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    
+    // Tạo mã nhập hàng theo định dạng NH-YYYYMMDD-XXXX
+    return `NH-${dateStr}-${randomNum}`;
   }
 }

@@ -140,7 +140,7 @@ export class PharmacyEmployeesService {
 
     const pharmacies = await this.sequelize.query(
       `
-      SELECT p.machinhanh
+      SELECT p.*
       FROM nhathuoc_nhanvien ne
       JOIN nhathuoc p ON ne.idnhathuoc = p.id
       WHERE ne.idnhanvien = :idnhanvien

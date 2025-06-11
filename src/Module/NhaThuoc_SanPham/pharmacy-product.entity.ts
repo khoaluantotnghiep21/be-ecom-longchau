@@ -8,13 +8,15 @@ import { UUID } from 'crypto';
 @Table({ tableName: 'nhathuoc_sanpham', timestamps: false })
 export class NhaThuoc_SanPham extends Model {
   @PrimaryKey
-  @Column({ type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 })
-  declare id: UUID;
+  @Column({ allowNull: false })
+  manhaphang: string;
 
+  @PrimaryKey
   @ForeignKey(() => Pharmacy)
   @Column({ allowNull: false })
   machinhanh: string;
 
+  @PrimaryKey
   @ForeignKey(() => SanPham)
   @Column({ allowNull: false })
   masanpham: string;
