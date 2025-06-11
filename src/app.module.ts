@@ -32,6 +32,7 @@ import { OrderDetailModule } from './Module/ChiTietDonHang/orderDetail.module';
 import { DeliveryModule } from './Module/GiaoHang/delivery.module';
 import { PharmacyProductModule } from './Module/NhaThuoc_SanPham/pharmacy-product.module';
 import { PharmacyEmployeesModule } from './Module/NhaThuoc_NhanVien/pharmacy-employees.module';
+import { UserInfoModule } from './Module/UserInfo/userinfo.module';
 
 @Module({
   imports: [
@@ -75,6 +76,8 @@ import { PharmacyEmployeesModule } from './Module/NhaThuoc_NhanVien/pharmacy-emp
     PharmacyProductModule,
     PharmacyEmployeesModule,
     PharmacyEmployeesModule
+    DeliveryModule,
+    UserInfoModule,
   ],
   controllers: [AppController],
   providers: [

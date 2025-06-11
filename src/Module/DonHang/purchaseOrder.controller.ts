@@ -378,7 +378,7 @@ export class PurchaseOrderController {
 
 @Put('updateStatus/:madonhang')
 @ApiBody({ type: UpdateStatusDto })
-async updateOrderStatus(
+async updateOrderStatus(  
   @Param('madonhang') madonhang: string,
   @Body() body: UpdateStatusDto
 ) {
