@@ -75,7 +75,7 @@ import { UserInfoModule } from './Module/UserInfo/userinfo.module';
     DeliveryModule,
     PharmacyProductModule,
     PharmacyEmployeesModule,
-    PharmacyEmployeesModule
+    PharmacyEmployeesModule,
     DeliveryModule,
     UserInfoModule,
   ],
