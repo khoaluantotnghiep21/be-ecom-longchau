@@ -63,6 +63,17 @@ export class IdentityUserService {
     return user;
   }
 
+  async getUserById(id: string): Promise<IdentityUser> {
+    const user = await this.identityUserRepo.findOne({
+      where: { id },
+      attributes: { exclude: ['matkhau'] },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
   async createAccount(createAccountDto: CreateAccountDto): Promise<UserRole> {
     const phoneExists = await this.isPhoneNumberExist(
       createAccountDto.sodienthoai,
