@@ -31,6 +31,7 @@ import { PurchaseOrderModule } from './Module/DonHang/purchaseOrder.module';
 import { OrderDetailModule } from './Module/ChiTietDonHang/orderDetail.module';
 import { DeliveryModule } from './Module/GiaoHang/delivery.module';
 import { PharmacyProductModule } from './Module/NhaThuoc_SanPham/pharmacy-product.module';
+import { PharmacyEmployeesModule } from './Module/NhaThuoc_NhanVien/pharmacy-employees.module';
 
 @Module({
   imports: [
@@ -68,11 +69,12 @@ import { PharmacyProductModule } from './Module/NhaThuoc_SanPham/pharmacy-produc
     IngredientModule,
     IngredientDetalsModule,    
     VoucherModule,
-    PharmacyModule,
-    PurchaseOrderModule,
+    PharmacyModule,    PurchaseOrderModule,
     OrderDetailModule,
     DeliveryModule,
-    PharmacyProductModule
+    PharmacyProductModule,
+    PharmacyEmployeesModule,
+    PharmacyEmployeesModule
   ],
   controllers: [AppController],
   providers: [
