@@ -153,4 +153,20 @@ export class PharmacyEmployeesService {
 
     return pharmacies;
   }
+
+  async getListEmployees(): Promise<any[]>{
+    const employees = await this.sequelize.query(
+      `
+      select u.* from identityuser u, userrole ur, role r
+      where u.id = ur.userid and ur.roleid = r.id and r.namerole ='staff'
+      `,
+      {
+        type: QueryTypes.SELECT
+      }
+    )
+    return employees;
+  }
+
 }
+
+

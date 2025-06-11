@@ -2,8 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/commo
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PharmacyEmployeesService } from './pharmacy-employees.service';
 import { PharmacyEmployeeDto, RemoveEmployeeDto, GetPharmacyEmployeesDto } from './dto/pharmacy-employee.dto';
-import { Roles } from 'src/common/decorator/roles.decorator';
-import { Role } from 'src/common/Enum/role.enum';
+
 import { Public } from 'src/common/decorator/public.decorator';
 
 @ApiTags('PharmacyEmployees')
@@ -62,5 +61,12 @@ export class PharmacyEmployeesController {
   @ApiResponse({ status: 404, description: 'Không tìm thấy nhân viên' })
   async getPharmaciesByEmployee(@Param('idnhanvien') idnhanvien: string) {
     return await this.pharmacyEmployeesService.getPharmaciesByEmployee(idnhanvien);
+  }
+
+  @Get('getListEmployee')
+  @Public()
+  @ApiOperation({ summary: 'Lấy danh sách nhân viên '})
+  async getListEmployee() {
+    return await this.pharmacyEmployeesService.getListEmployees();
   }
 }
