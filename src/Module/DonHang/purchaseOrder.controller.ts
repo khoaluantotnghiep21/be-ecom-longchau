@@ -174,15 +174,15 @@ export class PurchaseOrderController {
           );
 
         }
-        let url = this.configService.get<string>('VNP_RETURN_URL_WEB')
+        // let url = this.configService.get<string>('VNP_RETURN_URL_WEB')
         return res.redirect(
-          `${url}?madonhang=${orderInfo.madonhang}`
+          `http://localhost:3000/order-confirmation?madonhang=${orderInfo.madonhang}`
         );
       } catch (error) {
         console.error('VNPay return error:', error);
         let url = this.configService.get<string>('VNP_RETURN_URL_WEB')
         return res.redirect(
-          `${url}?madonhang=null`
+          `http://localhost:3000/order-confirmation?madonhang=null`
         );
 
       }
