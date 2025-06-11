@@ -114,11 +114,10 @@ export class PharmacyProductController {
   @ApiParam({ name: 'manhaphang', description: 'Mã Nhập hàng của thông tin sản phẩm nhà thuốc' })
 
   async updateProductStatus(
-    @Param('manhaphang') manhaphang: string, @Body()
-    statusDto: StatusDto
+    @Param('manhaphang') manhaphang: string
   ): Promise<NhaThuoc_SanPham[]> {
 
-    return await this.pharmacyProductService.updateProductStatus(manhaphang, statusDto);
+    return await this.pharmacyProductService.updateProductStatus(manhaphang);
   }
 
   @Delete('deletePharmacyProduct:id')

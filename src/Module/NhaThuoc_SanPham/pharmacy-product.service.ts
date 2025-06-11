@@ -227,10 +227,9 @@ export class PharmacyProductService {
    */
   async updateProductStatus(
     manhaphang: string,
-    statusDto: StatusDto
   ): Promise<NhaThuoc_SanPham[]> {
     const [affectedRows] = await this.pharmacyProductModel.update(
-      { ...statusDto },
+      { trangthai: 'Đã xác nhận' },
       { where: { manhaphang } }
     );
 
