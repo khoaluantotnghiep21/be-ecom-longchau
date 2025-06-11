@@ -1,9 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { GiaoHang } from './delivery.entity';
-import { DeliveryDto, UpdateDeliveryDto } from './dto/delivery.dto';
-import { Op } from 'sequelize';
+import { CreateDeliveryDto, UpdateDeliveryDto } from './dto/delivery.dto';
+import { Sequelize } from 'sequelize-typescript';
 import { PurchaseOrder } from '../DonHang/purchaseOrder.entity';
+import { QueryTypes } from 'sequelize';
+import { OrderDetail } from '../ChiTietDonHang/orderDetail.entity';
+import { DeliveryStatus } from 'src/common/Enum/delivery-status.enum';
 
 @Injectable()
 export class DeliveryService {
@@ -11,175 +14,140 @@ export class DeliveryService {
     @InjectModel(GiaoHang)
     private readonly deliveryModel: typeof GiaoHang,
     @InjectModel(PurchaseOrder)
-    private readonly orderModel: typeof PurchaseOrder,
+    private readonly purchaseOrderModel: typeof PurchaseOrder,
+    private readonly sequelize: Sequelize,
   ) {}
 
   /**
-   * Tạo thông tin giao hàng mới
-   * @param deliveryDto Thông tin giao hàng
-   * @returns Thông tin giao hàng đã tạo
+   * Tạo mới đơn giao hàng
+   * @param createDeliveryDto Thông tin đơn giao hàng
+   * @returns Đơn giao hàng đã tạo
    */
-  async createDelivery(deliveryDto: DeliveryDto): Promise<GiaoHang> {
+  async createDelivery(createDeliveryDto: CreateDeliveryDto): Promise<GiaoHang> {
     // Kiểm tra đơn hàng tồn tại
-    const orderExists = await this.orderModel.findOne({
-      where: { madonhang: deliveryDto.madonhang },
+    const order = await this.purchaseOrderModel.findOne({
+      where: { madonhang: createDeliveryDto.madonhang }
     });
 
-    if (!orderExists) {
+    if (!order) {
       throw new NotFoundException(
-        `Không tìm thấy đơn hàng với mã ${deliveryDto.madonhang}`,
+        `Không tìm thấy đơn hàng với mã ${createDeliveryDto.madonhang}`
       );
     }
 
-    // Kiểm tra xem đơn hàng đã có thông tin giao hàng chưa
+    // Kiểm tra xem đã có đơn giao hàng cho đơn hàng này chưa
     const existingDelivery = await this.deliveryModel.findOne({
-      where: { madonhang: deliveryDto.madonhang },
+      where: { madonhang: createDeliveryDto.madonhang }
     });
 
     if (existingDelivery) {
-      throw new Error(
-        `Đơn hàng ${deliveryDto.madonhang} đã có thông tin giao hàng`,
+      throw new BadRequestException(
+        `Đã tồn tại đơn giao hàng cho đơn hàng ${createDeliveryDto.madonhang}`
       );
     }
 
+    // Tính thời gian dự kiến giao hàng (từ 1-2 tiếng kể từ hiện tại)
+    const now = new Date();
+    const estimatedTime = new Date(now.getTime() + Math.random() * (2 - 1) * 60 * 60 * 1000 + 60 * 60 * 1000);
+
+    // Tạo đơn giao hàng mới
     return await this.deliveryModel.create({
-      ...deliveryDto,
-      trangthai: deliveryDto.trangthai || 'Đang chuẩn bị hàng',
+      ...createDeliveryDto,
+      thoigiandukien: estimatedTime,
+      trangthai: DeliveryStatus.DELIVERING,
     });
   }
 
   /**
-   * Lấy thông tin giao hàng theo ID
-   * @param id ID của thông tin giao hàng
-   * @returns Thông tin giao hàng
+   * Xác nhận đơn giao hàng thành công
+   * @param id ID của đơn giao hàng
+   * @returns Đơn giao hàng đã cập nhật
    */
-  async getDeliveryById(id: string): Promise<GiaoHang> {
+  async confirmDelivery(id: string): Promise<GiaoHang> {
     const delivery = await this.deliveryModel.findByPk(id);
     if (!delivery) {
-      throw new NotFoundException(`Không tìm thấy thông tin giao hàng với ID ${id}`);
+      throw new NotFoundException(`Không tìm thấy đơn giao hàng với ID ${id}`);
     }
-    return delivery;
-  }
 
-  /**
-   * Lấy thông tin giao hàng theo mã đơn hàng
-   * @param madonhang Mã đơn hàng
-   * @returns Thông tin giao hàng
-   */
-  async getDeliveryByOrderId(madonhang: string): Promise<GiaoHang> {
-    const delivery = await this.deliveryModel.findOne({
-      where: { madonhang },
+    // Cập nhật trạng thái và thời gian nhận hàng
+    await delivery.update({
+      thoigiannhan: new Date(),
+      trangthai: DeliveryStatus.DELIVERED,
     });
-    
-    if (!delivery) {
-      throw new NotFoundException(
-        `Không tìm thấy thông tin giao hàng cho đơn hàng ${madonhang}`,
-      );
-    }
-    
+
     return delivery;
   }
 
   /**
-   * Lấy tất cả thông tin giao hàng
-   * @returns Danh sách thông tin giao hàng
+   * Lấy danh sách tất cả đơn giao hàng
+   * @returns Danh sách đơn giao hàng
    */
-  async getAllDeliveries(): Promise<GiaoHang[]> {
-    return await this.deliveryModel.findAll();
+  async getAllDeliveries(): Promise<any[]> {
+    const deliveries = await this.sequelize.query(
+      `
+      SELECT g.*, dh.madonhang, dh.ngaymuahang, dh.tongtien, dh.userid
+      FROM giaohang g
+      JOIN donhang dh ON g.madonhang = dh.madonhang
+      ORDER BY dh.ngaymuahang DESC
+      `,
+      {
+        type: QueryTypes.SELECT
+      }
+    );
+
+    return deliveries;
   }
 
   /**
-   * Lấy danh sách giao hàng theo trạng thái
-   * @param trangthai Trạng thái giao hàng
-   * @returns Danh sách thông tin giao hàng theo trạng thái
+   * Lấy chi tiết của một đơn giao hàng, bao gồm thông tin đơn hàng và chi tiết đơn hàng
+   * @param id ID của đơn giao hàng
+   * @returns Chi tiết đơn giao hàng
    */
-  async getDeliveriesByStatus(trangthai: string): Promise<GiaoHang[]> {
-    return await this.deliveryModel.findAll({
-      where: { trangthai },
+  async getDeliveryDetails(id: string): Promise<any> {
+    const delivery = await this.deliveryModel.findByPk(id);
+    if (!delivery) {
+      throw new NotFoundException(`Không tìm thấy đơn giao hàng với ID ${id}`);
+    }
+
+    // Lấy thông tin đơn hàng
+    const order = await this.purchaseOrderModel.findOne({
+      where: { madonhang: delivery.madonhang }
     });
-  }
 
-  /**
-   * Cập nhật thông tin giao hàng
-   * @param id ID của thông tin giao hàng
-   * @param updateDeliveryDto Thông tin cập nhật
-   * @returns Thông tin giao hàng đã cập nhật
-   */
-  async updateDelivery(
-    id: string,
-    updateDeliveryDto: UpdateDeliveryDto,
-  ): Promise<GiaoHang> {
-    const delivery = await this.deliveryModel.findByPk(id);
-    
-    if (!delivery) {
-      throw new NotFoundException(`Không tìm thấy thông tin giao hàng với ID ${id}`);
-    }
-    
-    // Cập nhật thông tin
-    await delivery.update(updateDeliveryDto);
-    
-    return delivery;
-  }
+    // Lấy chi tiết đơn hàng
+    const orderDetails = await this.sequelize.query(
+      `
+      SELECT ct.*, sp.tensanpham, sp.masanpham
+      FROM chitietdonhang ct
+      JOIN sanpham sp ON ct.masanpham = sp.masanpham
+      WHERE ct.madonhang = :madonhang
+      `,
+      {
+        replacements: { madonhang: delivery.madonhang },
+        type: QueryTypes.SELECT
+      }
+    );
 
-  /**
-   * Cập nhật trạng thái giao hàng
-   * @param id ID của thông tin giao hàng
-   * @param trangthai Trạng thái mới
-   * @returns Thông tin giao hàng đã cập nhật
-   */
-  async updateDeliveryStatus(id: string, trangthai: string): Promise<GiaoHang> {
-    const delivery = await this.deliveryModel.findByPk(id);
-    
-    if (!delivery) {
-      throw new NotFoundException(`Không tìm thấy thông tin giao hàng với ID ${id}`);
-    }
-    
-    // Cập nhật trạng thái
-    await delivery.update({ trangthai });
-    
-    // Nếu trạng thái là "Đã giao", cập nhật thời gian nhận
-    if (trangthai === 'Đã giao') {
-      await delivery.update({ thoigiannhan: new Date() });
-    }
-    
-    return delivery;
-  }
-
-  /**
-   * Xóa thông tin giao hàng
-   * @param id ID của thông tin giao hàng
-   * @returns Thông báo kết quả
-   */
-  async deleteDelivery(id: string): Promise<{ success: boolean; message: string }> {
-    const delivery = await this.deliveryModel.findByPk(id);
-    
-    if (!delivery) {
-      throw new NotFoundException(`Không tìm thấy thông tin giao hàng với ID ${id}`);
-    }
-    
-    await delivery.destroy();
-    
     return {
-      success: true,
-      message: 'Xóa thông tin giao hàng thành công',
+      delivery,
+      order,
+      orderDetails
     };
   }
 
   /**
-   * Tìm kiếm thông tin giao hàng
-   * @param searchTerm Từ khóa tìm kiếm
-   * @returns Danh sách thông tin giao hàng phù hợp
+   * Cập nhật thông tin đơn giao hàng
+   * @param id ID của đơn giao hàng
+   * @param updateDeliveryDto Thông tin cần cập nhật
+   * @returns Đơn giao hàng đã cập nhật
    */
-  async searchDeliveries(searchTerm: string): Promise<GiaoHang[]> {
-    return await this.deliveryModel.findAll({
-      where: {
-        [Op.or]: [
-          { nguoidat: { [Op.like]: `%${searchTerm}%` } },
-          { nguoinhan: { [Op.like]: `%${searchTerm}%` } },
-          { madonhang: { [Op.like]: `%${searchTerm}%` } },
-          { trangthai: { [Op.like]: `%${searchTerm}%` } },
-        ],
-      },
-    });
+  async updateDelivery(id: string, updateDeliveryDto: UpdateDeliveryDto): Promise<GiaoHang> {
+    const delivery = await this.deliveryModel.findByPk(id);
+    if (!delivery) {
+      throw new NotFoundException(`Không tìm thấy đơn giao hàng với ID ${id}`);
+    }
+
+    await delivery.update(updateDeliveryDto);
+    return delivery;
   }
 }

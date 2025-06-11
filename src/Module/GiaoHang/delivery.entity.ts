@@ -9,14 +9,20 @@ export class GiaoHang extends Model {
   declare id: string;
 
   @Column({ allowNull: false })
-  nguoidat: string;
-
-  @Column({ allowNull: false })
   nguoinhan: string;
+
+  @Column
+  sodienthoainguoinhan: string;
+
+  @Column
+  diachinguoinhan: string;
 
   @ForeignKey(() => PurchaseOrder)
   @Column({ allowNull: false })
   madonhang: string;
+
+  @Column({ type: DataTypes.DATE })
+  thoigiandukien: Date;
 
   @Column({ type: DataTypes.DATE })
   thoigiannhan: Date;
