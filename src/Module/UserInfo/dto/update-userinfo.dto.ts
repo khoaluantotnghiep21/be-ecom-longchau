@@ -14,10 +14,14 @@ export class UpdateUserDto {
     ngaysinh?: Date;
 
     @ApiProperty({ required: false })
-    sodiem?: number;
-
-    @ApiProperty({ required: false })
     diachi?: string;
 
     @ApiProperty({ required: false, type: [String] }) roleids?: string[];
+
+    @ApiProperty({ required: false })
+    sodiem?: number;
+
+    @ApiProperty({ required: false })
+    sodienthoai?: string;
+
 }
