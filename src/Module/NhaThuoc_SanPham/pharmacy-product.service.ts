@@ -225,20 +225,28 @@ export class PharmacyProductService {
    * @param userid ID của người dùng đang đăng nhập
    * @returns Thông tin sản phẩm nhà thuốc đã cập nhật
    */
-  async updateProductStatus(
-    manhaphang: string,
-  ): Promise<NhaThuoc_SanPham[]> {
-    const [affectedRows] = await this.pharmacyProductModel.update(
-      { trangthai: 'Đã xác nhận' },
-      { where: { manhaphang } }
-    );
+async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
+  const found = await this.pharmacyProductModel.findAll({
+    where: { manhaphang },
+  });
 
-    if (affectedRows === 0) {
-      throw new NotFoundException(`Không tìm thấy sản phẩm với mã nhập hàng ${manhaphang}`);
-    }
-
-    return await this.pharmacyProductModel.findAll({ where: { manhaphang } });
+  if (!found || found.length === 0) {
+    throw new NotFoundException(`Không tìm thấy sản phẩm với mã nhập hàng: ${manhaphang}`);
   }
+
+  await this.pharmacyProductModel.update(
+    { tinhtrang: 'Đã xác nhận' },
+    { where: { manhaphang } }
+  );
+
+  // Lấy lại dữ liệu sau khi update để đảm bảo đồng bộ
+  const updated = await this.pharmacyProductModel.findAll({
+    where: { manhaphang },
+  });
+
+  return updated;
+}
+
 
 
   /**
