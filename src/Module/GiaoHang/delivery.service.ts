@@ -16,7 +16,7 @@ export class DeliveryService {
     @InjectModel(PurchaseOrder)
     private readonly purchaseOrderModel: typeof PurchaseOrder,
     private readonly sequelize: Sequelize,
-  ) {}
+  ) { }
 
   /**
    * Tạo mới đơn giao hàng
@@ -149,5 +149,38 @@ export class DeliveryService {
 
     await delivery.update(updateDeliveryDto);
     return delivery;
+  }
+
+  /**
+ * Lấy chi tiết giao hàng theo mã đơn hàng
+ * @param madonhang Mã đơn hàng
+ * @returns Chi tiết giao hàng, đơn hàng, chi tiết đơn hàng
+ */
+  async getDeliveryDetailsByMadonhang(madonhang: string): Promise<any> {
+    const delivery = await this.deliveryModel.findOne({ where: { madonhang } });
+    if (!delivery) {
+      throw new NotFoundException(`Không tìm thấy đơn giao hàng với mã đơn hàng ${madonhang}`);
+    }
+
+    const order = await this.purchaseOrderModel.findOne({ where: { madonhang } });
+
+    const orderDetails = await this.sequelize.query(
+      `
+    SELECT ct.*, sp.tensanpham, sp.masanpham
+    FROM chitietdonhang ct
+    JOIN sanpham sp ON ct.masanpham = sp.masanpham
+    WHERE ct.madonhang = :madonhang
+    `,
+      {
+        replacements: { madonhang },
+        type: QueryTypes.SELECT
+      }
+    );
+
+    return {
+      delivery,
+      order,
+      orderDetails
+    };
   }
 }
