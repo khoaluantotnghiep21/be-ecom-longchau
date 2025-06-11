@@ -32,7 +32,7 @@ export class PharmacyEmployeesController {
     return await this.pharmacyEmployeesService.removeEmployeeFromPharmacy(removeEmployeeDto);
   }
 
-  @Get('getListEmployee/:idnhathuoc')
+  @Get('getListEmployeesInPharmacy/:idnhathuoc')
   @Public()
   @ApiOperation({ summary: 'Lấy danh sách nhân viên của nhà thuốc' })
   @ApiParam({ name: 'idnhathuoc', description: 'ID của nhà thuốc' })
