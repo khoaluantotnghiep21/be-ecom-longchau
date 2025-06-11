@@ -1,24 +1,22 @@
-import { UUID } from "crypto";
-import { DataTypes } from "sequelize";
-import { BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { IdentityUser } from "../IdentityUser/identityuser.entity";
+import { BelongsTo, Column, DataType, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { UserInfo } from "../UserInfo/userinfo.entity";
 import { Role } from "../Role/role.entity";
 
 @Table({ tableName: "userrole", timestamps: false })
-export class UserRole extends Model{
+export class UserRole extends Model {
     @PrimaryKey
-    @ForeignKey(()=> IdentityUser)
-    @Column({ type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 })
-    userid: UUID;
+    @ForeignKey(() => UserInfo)
+    @Column({ type: DataType.UUID })
+    userid: string;
 
     @PrimaryKey
     @ForeignKey(() => Role)
-    @Column({ type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 })
-    roleid: UUID;
+    @Column({ type: DataType.UUID })
+    roleid: string;
 
-    @BelongsTo(() => IdentityUser)
-    user: IdentityUser;
+    @BelongsTo(() => UserInfo, 'userid')
+    user: UserInfo;
 
-    @BelongsTo(() => Role)
+    @BelongsTo(() => Role, 'roleid')
     role: Role;
 }

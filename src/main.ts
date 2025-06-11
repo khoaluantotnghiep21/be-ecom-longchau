@@ -33,6 +33,7 @@ async function bootstrap() {
       },
       'access-token',
     )
+    .addTag('UserInfo')
     .addTag('IdentityUser')
     .addTag('Product')
     .addTag('Category')
