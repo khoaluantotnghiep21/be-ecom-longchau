@@ -184,7 +184,7 @@ export class PurchaseOrderService {
             FROM identityuser i
             JOIN donhang d ON i.id = d.userid
             JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
-            JOIN giaohang g ON g.madonhang = d.madonhang
+            LEFT JOIN giaohang g ON g.madonhang = d.madonhang
             JOIN sanpham s ON ct.masanpham = s.masanpham
             JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
             WHERE d.madonhang = :madonhang
