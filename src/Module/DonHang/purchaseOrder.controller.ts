@@ -44,7 +44,7 @@ export class PurchaseOrderController {
     if (!userid) {
       throw new NotFoundException('User ID not found in request');
     }
-    const trangthai = StatusPurchase.Confirmed;
+    const trangthai = StatusPurchase.Pending;
     if (orderDetailsDto.phuongthucthanhtoan === PaymentMethod.BankTransfer) {
       const statusPending = StatusPurchase.Pending;
       return this.purchaseOrderService.createNewPurchaseOrder(userid, statusPending, orderDetailsDto);
