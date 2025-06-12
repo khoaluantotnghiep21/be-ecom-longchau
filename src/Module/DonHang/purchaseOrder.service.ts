@@ -71,7 +71,7 @@ export class PurchaseOrderService {
         return await order.save();
 
     }
-    
+
     async getOrderByMadonhang(madonhang: string): Promise<PurchaseOrder> {
         const order = await this.purchaseOrderRepo.findOne({
             where: { madonhang },
@@ -152,51 +152,38 @@ export class PurchaseOrderService {
         return results || [];
     }
 
+    // purchaseOrder.service.ts
     async getOrderDetailsByMadonhang(madonhang: string): Promise<any> {
-        const order = await this.purchaseOrderRepo.findOne({where: { madonhang }});
-        if (!order) {
-            throw new NotFoundException(`Order with ID ${madonhang} not found`);
-        }
-
-        const [results] = await this.sequelize.query(
-            `       
-           SELECT 
-            d.madonhang, 
-            i.hoten,
-            g.diachinguoinhan,
-            d.machinhanh,
-            g.thoigiannhan,
-            g.nguoinhan,
-            g.sodienthoainguoinhan,
-            i.sodienthoai,
-            i.diachi,
-            d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
-            d.trangthai,
-            json_agg(
-                json_build_object(
-                'tensanpham', s.tensanpham,
-                'donvitinh', ct.donvitinh,
-                'soluong', ct.soluong,
-                'giaban', ct.giaban,
-                'url', a.url
-                )
-            ) AS sanpham
-            FROM identityuser i
-            JOIN donhang d ON i.id = d.userid
-            JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
-            JOIN giaohang g ON g.madonhang = d.madonhang
-            JOIN sanpham s ON ct.masanpham = s.masanpham
-            JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
-            WHERE d.madonhang = :madonhang
-            GROUP BY d.madonhang,d.machinhanh,g.diachinguoinhan,g.thoigiannhan,g.nguoinhan, g.sodienthoainguoinhan,i.hoten, i.sodienthoai, i.diachi, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang
-            `,
+        const [result] = await this.sequelize.query(
+            `
+    SELECT 
+      d.madonhang, 
+      d.thanhtien,
+      d.trangthai,
+      i.hoten,
+      json_agg(
+        json_build_object(
+          'tensanpham', s.tensanpham,
+          'donvitinh', ct.donvitinh,
+          'soluong', ct.soluong,
+          'giaban', ct.giaban,
+          'url', a.url
+        )
+      ) AS sanpham
+    FROM donhang d
+    JOIN identityuser i ON i.id = d.userid
+    JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
+    JOIN sanpham s ON ct.masanpham = s.masanpham
+    JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
+    WHERE d.madonhang = :madonhang
+    GROUP BY d.madonhang, d.thanhtien, d.trangthai, i.hoten
+    `,
             {
                 replacements: { madonhang },
                 raw: true,
-                plain: false 
+                plain: false
             }
         );
-
-        return results;
+        return result || null;
     }
 }
