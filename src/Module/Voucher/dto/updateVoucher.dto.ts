@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class UpdateVoucherDto {
     @ApiProperty()
-    mavoucher: boolean;
+    mavoucher: string;
 
     @ApiProperty()
     loaivoucher: boolean;
@@ -15,4 +15,7 @@ export class UpdateVoucherDto {
 
     @ApiProperty()
     hansudung: Date;
+
+    @ApiProperty()
+    giatri: number;
 }

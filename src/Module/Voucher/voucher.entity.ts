@@ -21,4 +21,7 @@ export class Voucher extends Model{
 
     @Column
     hansudung: Date;
+
+    @Column
+    giatri: number;
 }
