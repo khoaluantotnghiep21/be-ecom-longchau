@@ -146,4 +146,25 @@ export class PharmacyProductController {
   async checkProduct(@Param('masanpham') masanpham: string) {
     return await this.pharmacyProductService.checkProduct(masanpham);
   }
+
+  @Public()
+  @Post('checkUnitDetails')
+  @ApiOperation({ summary: 'Kiểm tra chi tiết đơn vị của danh sách sản phẩm' })
+  @ApiBody({ 
+    schema: {
+      type: 'object',
+      properties: {
+        masanpham: {
+          type: 'array',
+          items: {
+            type: 'string'
+          },
+          description: 'Danh sách mã sản phẩm cần kiểm tra'
+        }
+      }
+    }
+  })
+  async checkUnitDetails(@Body() body: { masanpham: string[] }) {
+    return await this.pharmacyProductService.checkUnitDetails(body.masanpham);
+  }
 }
