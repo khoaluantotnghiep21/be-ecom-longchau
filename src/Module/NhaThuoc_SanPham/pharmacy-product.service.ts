@@ -235,7 +235,7 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
   }
 
   await this.pharmacyProductModel.update(
-    { tinhtrang: 'Đã xác nhận' },
+    { tinhtrang: 'Đã xác nhận đơn hàng' },
     { where: { manhaphang } }
   );
 

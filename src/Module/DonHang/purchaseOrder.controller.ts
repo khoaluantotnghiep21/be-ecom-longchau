@@ -39,17 +39,21 @@ export class PurchaseOrderController {
   ) { }
 
   @Post('createNewPurchaseOrder')
-  async createNewPurchaseOrder(@Req() req: Request, @Body() orderDetailsDto: OrderDetailsDto) {
-    const userid = req['user']?.sub;
+  async createNewPurchaseOrder(@Req() req: Request, @Body() orderDetailsDto: OrderDetailsDto) {    const userid = req['user']?.sub;
     if (!userid) {
       throw new NotFoundException('User ID not found in request');
     }
-    const trangthai = StatusPurchase.Confirmed;
-    if (orderDetailsDto.phuongthucthanhtoan === PaymentMethod.BankTransfer) {
-      const statusPending = StatusPurchase.Pending;
-      return this.purchaseOrderService.createNewPurchaseOrder(userid, statusPending, orderDetailsDto);
+    const method = orderDetailsDto.phuongthucthanhtoan?.trim();
+
+    console.log(`Payment method: "${method}"`);
+    console.log(`PaymentMethod.BankTransfer: "${PaymentMethod.BankTransfer}"`);
+    console.log(`PaymentMethod.CashOnDelivery: "${PaymentMethod.CashOnDelivery}"`);
+
+    if (method === 'Chuyển khoản ngân hàng') {
+      return this.purchaseOrderService.createNewPurchaseOrder(userid, StatusPurchase.Pending, orderDetailsDto);
     }
-    return this.purchaseOrderService.createNewPurchaseOrder(userid, trangthai, orderDetailsDto);
+    return this.purchaseOrderService.createNewPurchaseOrder(userid, StatusPurchase.Confirmed, orderDetailsDto);
+
   }
 
   @Post('create-payment-url')
