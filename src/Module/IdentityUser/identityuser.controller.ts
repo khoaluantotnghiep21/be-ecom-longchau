@@ -44,6 +44,19 @@ export class IdentityUserController {
   }
 
   @Public()
+  @Get('getUserById/:id')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'ID của người dùng',
+  })
+  async getUserById(@Param('id') id: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    return await this.identityUserService.getUserById(id);
+
+  }
+
+  @Public()
   @Get('checkPhoneExists/:phoneNumber')
   @ApiParam({
     name: 'phoneNumber',
@@ -78,12 +91,12 @@ export class IdentityUserController {
   }
 
   @Put('change-password/:sodienthoai')
-async changePassword(
-  @Param('sodienthoai') sodienthoai: string,
-  @Body('oldPassword') oldPassword: string,
-  @Body('newPassword') newPassword: string
-) {
-  return this.identityUserService.changePassword(sodienthoai, oldPassword, newPassword);
-}
+  async changePassword(
+    @Param('sodienthoai') sodienthoai: string,
+    @Body('oldPassword') oldPassword: string,
+    @Body('newPassword') newPassword: string
+  ) {
+    return this.identityUserService.changePassword(sodienthoai, oldPassword, newPassword);
+  }
 
 }

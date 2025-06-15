@@ -18,12 +18,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { DeliveryService } from './delivery.service';
-import { 
-  CreateDeliveryDto, 
-  DeliveryDto, 
-  UpdateDeliveryDto, 
+import {
+  CreateDeliveryDto,
+  DeliveryDto,
+  UpdateDeliveryDto,
   ConfirmDeliveryDto,
-  GetDeliveryDetailsDto 
+  GetDeliveryDetailsDto
 } from './dto/delivery.dto';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from 'src/common/Enum/role.enum';
@@ -34,7 +34,7 @@ import { GiaoHang } from './delivery.entity';
 @Controller('delivery')
 @ApiBearerAuth('access-token')
 export class DeliveryController {
-  constructor(private readonly deliveryService: DeliveryService) {}
+  constructor(private readonly deliveryService: DeliveryService) { }
 
   @Post('create')
   @Roles(Role.Admin, Role.Staff)
@@ -87,5 +87,15 @@ export class DeliveryController {
     @Body() updateDeliveryDto: UpdateDeliveryDto
   ): Promise<GiaoHang> {
     return await this.deliveryService.updateDelivery(id, updateDeliveryDto);
+  }
+
+  @Get('getDeliveryDetailsByMadonhang/:madonhang')
+  @Roles(Role.Admin, Role.Staff)
+  @ApiOperation({ summary: 'Lấy thông tin giao hàng theo mã đơn hàng' })
+  @ApiParam({ name: 'madonhang', description: 'Mã đơn hàng' })
+  @ApiResponse({ status: 200, description: 'Lấy thông tin thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy đơn giao hàng' })
+  async getDeliveryByMadonhang(@Param('madonhang') madonhang: string) {
+    return await this.deliveryService.getDeliveryDetailsByMadonhang(madonhang);
   }
 }
