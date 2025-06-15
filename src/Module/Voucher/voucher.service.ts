@@ -12,10 +12,8 @@ export class VoucherService {
     ) {}
 
     async createVoucher(createVoucherDto: CreateVoucherDto): Promise<Voucher> {
-        const mavoucher = 'V' + Math.floor(Math.random() * 90000000).toString();
-        const data ={mavoucher, ...createVoucherDto};
-        const voucher = await this.voucherRepo.create(data);
-        return voucher;
+        const data ={...createVoucherDto};
+        return await this.voucherRepo.create(data);
     }
 
     async findAll(): Promise<Voucher[]> {

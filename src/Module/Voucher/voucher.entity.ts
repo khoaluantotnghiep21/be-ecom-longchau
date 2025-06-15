@@ -14,7 +14,7 @@ export class Voucher extends Model{
     loaivoucher: boolean;
 
     @Column
-    giatri: number;
+    soluong: number;
 
     @Column
     mota: string;

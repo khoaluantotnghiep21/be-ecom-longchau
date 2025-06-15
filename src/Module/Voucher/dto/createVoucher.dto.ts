@@ -2,10 +2,13 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateVoucherDto {
     @ApiProperty()
+    mavoucher: boolean;
+
+    @ApiProperty()
     loaivoucher: boolean;
 
     @ApiProperty()
-    giatri: number;
+    soluong: number;
 
     @ApiProperty()
     mota: string;
