@@ -15,4 +15,7 @@ export class UpdateVoucherDto {
 
     @ApiProperty()
     hansudung: Date;
+
+    @ApiProperty()
+    giatri: number;
 }

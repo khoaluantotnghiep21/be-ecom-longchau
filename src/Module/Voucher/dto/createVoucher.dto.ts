@@ -15,4 +15,7 @@ export class CreateVoucherDto {
 
     @ApiProperty()
     hansudung: Date;
+    
+    @ApiProperty()
+    giatri: number;
 }
