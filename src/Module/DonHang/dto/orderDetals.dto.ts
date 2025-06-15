@@ -30,7 +30,7 @@ export class OrderDetailsDto {
     @ApiProperty()
     phivanchuyen: number;
     @ApiProperty()
-    machinhhanh?: string;
+    machinhhanh: string;
     @ApiProperty({ type: [OrderDetailItemDto], description: 'Danh sách chi tiết đơn hàng' })
     details: OrderDetailItemDto[];
 }
