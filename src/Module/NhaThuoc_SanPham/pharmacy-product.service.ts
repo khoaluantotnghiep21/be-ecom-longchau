@@ -11,20 +11,7 @@ import { SimpleProductInputDto } from './dto/simple-product-input.dto';
 import { UnitDetals } from '../ChiTietDonViTinh/chitietdonvitinh.entity';
 import { Unit } from '../DonViTinh/donvitinh.entity';
 
-function quyDoiSoLuongThucTeTuUnitDetails(
-  soluongNhap: number,
-  unitDetails: UnitDetals[]
-): number {
-  if (!soluongNhap || soluongNhap <= 0) throw new Error("Số lượng nhập không hợp lệ");
 
-  const dvtMacDinh = unitDetails.find(u => u.dinhluong === 1);
-  if (!dvtMacDinh) throw new Error("Không có đơn vị nhập mặc định (dinhluong = 1)");
-
-  const maxDinhLuong = Math.max(...unitDetails.map(u => u.dinhluong));
-  const tile = maxDinhLuong / dvtMacDinh.dinhluong;
-
-  return soluongNhap * tile;
-}
 
 @Injectable()
 export class PharmacyProductService {
@@ -275,147 +262,173 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
    * @returns Kết quả xử lý thêm sản phẩm
    */
   async createMultipleProducts(
-  multiProductsDto: MultiProductsDto,
-  userid: string
-): Promise<{
-  success: boolean;
-  message: string;
-  manhaphang: string;
-  totalProducts: number;
-  createdProducts: number;
-  updatedProducts: number;
-  failedProducts: number;
-  details: {
-    created: NhaThuoc_SanPham[];
-    updated: NhaThuoc_SanPham[];
-    failed: { product: ProductQuantityDto; reason: string }[];
-  };
-}> {
-  const { machinhanh, products } = multiProductsDto;
-  const batchImportCode = this.generateImportCode();
-
-  const result = {
-    success: true,
-    message: '',
-    manhaphang: batchImportCode,
-    totalProducts: products.length,
-    createdProducts: 0,
-    updatedProducts: 0,
-    failedProducts: 0,
+    multiProductsDto: MultiProductsDto,
+    userid: string
+  ): Promise<{
+    success: boolean;
+    message: string;
+    manhaphang: string;
+    totalProducts: number;
+    createdProducts: number;
+    updatedProducts: number;
+    failedProducts: number;
     details: {
-      created: [] as NhaThuoc_SanPham[],
-      updated: [] as NhaThuoc_SanPham[],
-      failed: [] as { product: ProductQuantityDto; reason: string }[],
-    },
-  };
+      created: NhaThuoc_SanPham[];
+      updated: NhaThuoc_SanPham[];
+      failed: { product: ProductQuantityDto; reason: string }[];
+    };
+  }> {
+    const { machinhanh, products } = multiProductsDto;
 
-  for (const productDto of products) {
-    const masanpham = productDto.masanpham.trim();
-    console.log(`Processing product: ${masanpham} with quantity: ${productDto.soluong}`);
+    // Tạo một mã nhập hàng duy nhất cho toàn bộ lô
+    const batchImportCode = this.generateImportCode();
 
-    try {
-      // Lấy sản phẩm từ cơ sở dữ liệu
-      const product = await this.productModel.findOne({
-        where: { masanpham },
-      });
-      
-      if (!product) {
-        console.log(`Product not found: ${masanpham}`);
-        result.failedProducts++;
-        result.details.failed.push({
-          product: productDto,
-          reason: `Không tìm thấy sản phẩm ${masanpham} trong hệ thống`,
-        });
-        continue;
-      }
-      
-      console.log(`Found product: ${masanpham}, ID: ${product.id}`);
-      
-      // Lấy chi tiết đơn vị của sản phẩm
-      const unitDetails = await this.sequelize.query(
-        `SELECT ud.*, u.donvitinh 
-         FROM chitietdonvi ud 
-         JOIN donvitinh u ON ud.madonvitinh = u.madonvitinh 
-         WHERE ud.masanpham = :masanpham`,
-        {
-          replacements: { masanpham },
-          type: QueryTypes.SELECT,
+    // Kết quả thực hiện
+    const result = {
+      success: true,
+      message: '',
+      manhaphang: batchImportCode, // Thêm mã nhập hàng vào kết quả
+      totalProducts: products.length,
+      createdProducts: 0,
+      updatedProducts: 0,
+      failedProducts: 0,
+      details: {
+        created: [] as NhaThuoc_SanPham[],
+        updated: [] as NhaThuoc_SanPham[],
+        failed: [] as { product: ProductQuantityDto; reason: string }[],
+      },
+    };
+
+    // Danh sách mã sản phẩm để kiểm tra tồn tại
+    const productCodes = products.map((p) => p.masanpham?.trim());
+    
+    // In ra log để debug
+    console.log('Tìm kiếm các mã sản phẩm:', JSON.stringify(productCodes));
+
+    // Sử dụng Op.in để tìm kiếm
+    const { Op } = require('sequelize');
+    const existingProducts = await this.productModel.findAll({
+      where: { 
+        masanpham: {
+          [Op.in]: productCodes
         }
-      );
-      
-      console.log(`Found ${unitDetails.length} unit details for product ${masanpham}`);
-      
-      if (!unitDetails || unitDetails.length === 0) {
-        result.failedProducts++;
-        result.details.failed.push({
-          product: productDto,
-          reason: `Không tìm thấy chi tiết đơn vị cho sản phẩm ${masanpham}`,
-        });
-        continue;
-      }
+      },
+    });
 
-      // Quy đổi số lượng nhập về đơn vị nhỏ nhất
-      let actualQuantity: number;
-      try {
-        actualQuantity = quyDoiSoLuongThucTeTuUnitDetails(
-          productDto.soluong,
-          unitDetails as any
-        );
-        console.log(`Converted quantity for ${masanpham}: ${productDto.soluong} -> ${actualQuantity}`);
-      } catch (conversionError) {
-        console.error(`Error converting quantity for ${masanpham}:`, conversionError);
-        result.failedProducts++;
-        result.details.failed.push({
-          product: productDto,
-          reason: `Lỗi quy đổi số lượng: ${conversionError.message}`,
-        });
-        continue;
-      }
+    // In ra số lượng sản phẩm tìm thấy để debug
+    console.log(`Tìm thấy ${existingProducts.length} sản phẩm trong database`);
+    existingProducts.forEach(product => {
+      console.log(`- Mã: '${product.masanpham}', ID: ${product.id}`);
+    });
 
-      // Kiểm tra tồn tại sản phẩm trong nhà thuốc
-      const existing = await this.pharmacyProductModel.findOne({
-        where: { machinhanh, masanpham },
-      });
+    // Tạo map để tra cứu nhanh
+    const productMap = new Map();
+    existingProducts.forEach((product) => {
+      productMap.set(product.masanpham?.trim(), product);
+    });
 
-      if (existing) {
-        existing.soluong += actualQuantity;
-        existing.userid = userid;
-        existing.ngaygui = new Date();
-        await existing.save();
-        console.log(`Updated existing pharmacy product ${masanpham}, new quantity: ${existing.soluong}`);
+    // Xử lý từng sản phẩm trong danh sách
+    await Promise.all(
+      products.map(async (product) => {
+        try {
+          // Kiểm tra sản phẩm tồn tại
+          const trimmedCode = product.masanpham?.trim();
+          console.log(`Đang kiểm tra sản phẩm với mã: '${trimmedCode}'`);
+          
+          let foundProduct = productMap.get(trimmedCode);
+          
+          if (!foundProduct) {
+            console.log(`Không tìm thấy sản phẩm với mã: '${trimmedCode}' trong map, thử tìm trực tiếp...`);
+            
+            // Thử tìm kiếm trực tiếp từ database một lần nữa
+            try {
+              // Tìm kiếm chính xác
+              foundProduct = await this.productModel.findOne({
+                where: { masanpham: trimmedCode }
+              });
 
-        result.updatedProducts++;
-        result.details.updated.push(existing);
-      } else {
-        const created = await this.pharmacyProductModel.create({
-          machinhanh,
-          masanpham,
-          soluong: actualQuantity,
-          manhaphang: batchImportCode,
-          userid,
-          ngaygui: new Date(),
-          tinhtrang: 'Chưa duyệt',
-        });
-        console.log(`Created new pharmacy product ${masanpham} with quantity: ${actualQuantity}`);
+              // Nếu không tìm thấy, thử tìm bỏ qua chữ hoa/thường
+              if (!foundProduct) {
+                const { Op } = require('sequelize');
+                const allProductsWithSimilarCode = await this.productModel.findAll({
+                  where: Sequelize.where(
+                    Sequelize.fn('LOWER', Sequelize.col('masanpham')), 
+                    Sequelize.fn('LOWER', trimmedCode)
+                  )
+                });
+                
+                if (allProductsWithSimilarCode && allProductsWithSimilarCode.length > 0) {
+                  foundProduct = allProductsWithSimilarCode[0];
+                  console.log(`Tìm thấy sản phẩm với mã tương tự (case insensitive): ${foundProduct.masanpham}`);
+                }
+              }
+            } catch (searchError) {
+              console.error(`Lỗi khi tìm kiếm sản phẩm: ${searchError.message}`);
+            }
+            
+            if (foundProduct) {
+              console.log(`Tìm thấy sản phẩm qua truy vấn trực tiếp: ${foundProduct.masanpham}, ID: ${foundProduct.id}`);
+              productMap.set(trimmedCode, foundProduct);
+            } else {
+              result.failedProducts++;
+              result.details.failed.push({
+                product,
+                reason: `Không tìm thấy sản phẩm với mã ${trimmedCode}`,
+              });
+              return;
+            }
+          }
 
-        result.createdProducts++;
-        result.details.created.push(created);
-      }
-    } catch (err) {
-      console.error(`Error processing product ${masanpham}:`, err);
-      result.failedProducts++;
-      result.details.failed.push({
-        product: productDto,
-        reason: err.message,
-      });
-    }
+          // Kiểm tra xem sản phẩm đã có trong nhà thuốc chưa
+          const existingPharmacyProduct = await this.pharmacyProductModel.findOne({
+            where: {
+              machinhanh: machinhanh,
+              masanpham: product.masanpham,
+            },
+          });
+
+          if (existingPharmacyProduct) {
+            // Nếu đã tồn tại, cập nhật số lượng
+            existingPharmacyProduct.soluong += product.soluong;
+            existingPharmacyProduct.userid = userid;
+            existingPharmacyProduct.ngaygui = new Date();
+            await existingPharmacyProduct.save();
+            
+            result.updatedProducts++;
+            result.details.updated.push(existingPharmacyProduct);
+          } else {
+            // Tạo mới thông tin sản phẩm nhà thuốc
+            const newPharmacyProduct = await this.pharmacyProductModel.create({
+              machinhanh: machinhanh,
+              masanpham: product.masanpham,
+              soluong: product.soluong,
+              manhaphang: batchImportCode, // Sử dụng cùng một mã nhập hàng cho toàn bộ lô
+              userid,
+              ngaygui: new Date(),
+              tinhtrang: 'Chưa duyệt',
+            });
+            
+            result.createdProducts++;
+            result.details.created.push(newPharmacyProduct);
+          }
+        } catch (error) {
+          result.failedProducts++;
+          result.details.failed.push({
+            product,
+            reason: `Lỗi khi xử lý: ${error.message}`,
+          });
+        }
+      })
+    );
+
+    // Tạo thông báo tổng hợp
+    result.message = `Đã xử lý ${result.totalProducts} sản phẩm trong lô ${batchImportCode}: ${result.createdProducts} mới, ${result.updatedProducts} cập nhật, ${result.failedProducts} thất bại.`;
+    result.success = result.failedProducts < result.totalProducts; // Thành công nếu ít nhất 1 sản phẩm được xử lý
+    
+    return result;
   }
 
-  result.message = `Đã xử lý ${result.totalProducts} sản phẩm: ${result.createdProducts} tạo mới, ${result.updatedProducts} cập nhật, ${result.failedProducts} thất bại.`;
-  result.success = result.failedProducts < result.totalProducts;
 
-  return result;
-}
 
 
   /**
