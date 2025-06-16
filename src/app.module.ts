@@ -33,6 +33,7 @@ import { DeliveryModule } from './Module/GiaoHang/delivery.module';
 import { PharmacyProductModule } from './Module/NhaThuoc_SanPham/pharmacy-product.module';
 import { PharmacyEmployeesModule } from './Module/NhaThuoc_NhanVien/pharmacy-employees.module';
 import { UserInfoModule } from './Module/UserInfo/userinfo.module';
+import { DonThuocTuVanModule } from './Module/DonThuocTuVan/donthuoctuvan.module';
 
 @Module({
   imports: [
@@ -72,12 +73,12 @@ import { UserInfoModule } from './Module/UserInfo/userinfo.module';
     VoucherModule,
     PharmacyModule,    PurchaseOrderModule,
     OrderDetailModule,
-    DeliveryModule,
-    PharmacyProductModule,
+    DeliveryModule,    PharmacyProductModule,
     PharmacyEmployeesModule,
     PharmacyEmployeesModule,
     DeliveryModule,
     UserInfoModule,
+    DonThuocTuVanModule,
   ],
   controllers: [AppController],
   providers: [

@@ -374,6 +374,15 @@ export class PurchaseOrderController {
     return this.purchaseOrderService.getOrderDetailsByMadonhang(madonhang);
   }
 
+   @Public()
+  @Get('getOrderByMaChiNhanh/:machinhanh')
+  async getOrderByMaChiNhanh(@Param('machinhanh') machinhanh: string) {
+    if (!machinhanh) {
+      throw new NotFoundException('Order ID not found');
+    }
+    return this.purchaseOrderService.getOrderDetailsByMaChiNhanh(machinhanh);
+  }
+
   @Public()
   @Get('getAllOrders')
   async getAllOrders() {

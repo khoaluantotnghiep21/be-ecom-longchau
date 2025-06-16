@@ -199,4 +199,53 @@ async getOrderDetailsByMadonhang(madonhang: string): Promise<any> {
 
         return results;
     }
+
+    async getOrderDetailsByMaChiNhanh(machinhanh: string): Promise<any> {
+        const order = await this.purchaseOrderRepo.findOne({where: { machinhanh }});
+        if (!order) {
+            throw new NotFoundException(`Order with ID ${machinhanh} not found`);
+        }
+
+        const [results] = await this.sequelize.query(
+            `       
+           SELECT 
+            d.madonhang, 
+            i.hoten as nguoiban,
+            d.machinhanh,
+            g.thoigiannhan,
+            d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
+            t.sodienthoai as sodienthoainguoinhan,
+            t.hoten as nguoinhan,
+            t.ghichu,
+            d.trangthai,
+            json_agg(
+                json_build_object(
+                'tensanpham', s.tensanpham,
+                'donvitinh', ct.donvitinh,
+                'soluong', ct.soluong,
+                'giaban', ct.giaban,
+                'url', a.url
+                )
+            ) AS sanpham
+            FROM identityuser i
+            JOIN donhang d ON i.id = d.userid
+            JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
+            LEFT JOIN giaohang g ON g.madonhang = d.madonhang
+            JOIN sanpham s ON ct.masanpham = s.masanpham
+            JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
+            JOIN donthuoctuvan t ON t.madonhang = d.madonhang
+            WHERE d.machinhanh = :machinhanh
+            GROUP BY d.madonhang,d.machinhanh,g.diachinguoinhan,g.thoigiannhan,g.nguoinhan, g.sodienthoainguoinhan,i.hoten, i.sodienthoai, i.diachi, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang, t.sodienthoai, t.hoten, t.ghichu
+            `,
+            {
+                replacements: { machinhanh },
+                raw: true,
+                plain: false 
+            }
+        );
+
+        return results;
+    }
 }
+
+
