@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/sequelize';
 import { NhaThuoc_SanPham } from './pharmacy-product.entity';
 import { SanPham } from '../SanPham/product.entity';
-import { PharmacyProductDto, StatusDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
+import { CapNhatTonKhoDto, PharmacyProductDto, StatusDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
 import { IdentityUser } from '../IdentityUser/identityuser.entity';
 import { QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
@@ -653,5 +653,18 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
     
     // Tạo mã nhập hàng theo định dạng NH-YYYYMMDD-XXXX
     return `NH-${dateStr}-${randomNum}`;
+  }
+
+  async updateTonKho(machinhanh: string, masanpham: string, capNhatTonKho: CapNhatTonKhoDto): Promise<NhaThuoc_SanPham> {
+    const product = await this.pharmacyProductModel.findOne({
+      where: { machinhanh, masanpham },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Không tìm thấy sản phẩm với mã ${masanpham} trong chi nhánh ${machinhanh}`);
+    }
+   product.set({soluong: capNhatTonKho.soluongtonkho})
+   await product.save();
+    return product;
   }
 }

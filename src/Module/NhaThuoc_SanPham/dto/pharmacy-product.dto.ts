@@ -92,3 +92,10 @@ export class StatusDto{
   @IsString()
   tinhtrang: string;
 }
+
+export class CapNhatTonKhoDto {
+  @ApiProperty()
+  @IsNotEmpty({ message: 'Số lượng tồn kho không được để trống' })
+  @IsNumber()
+  soluongtonkho: number;
+}

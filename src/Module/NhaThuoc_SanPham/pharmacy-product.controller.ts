@@ -19,7 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PharmacyProductService } from './pharmacy-product.service';
-import { PharmacyProductDto, StatusDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
+import { CapNhatTonKhoDto, PharmacyProductDto, StatusDto, UpdatePharmacyProductDto } from './dto/pharmacy-product.dto';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { Role } from 'src/common/Enum/role.enum';
 import { Public } from 'src/common/decorator/public.decorator';
@@ -166,5 +166,16 @@ export class PharmacyProductController {
   })
   async checkUnitDetails(@Body() body: { masanpham: string[] }) {
     return await this.pharmacyProductService.checkUnitDetails(body.masanpham);
+  }
+
+
+  @Public()
+  @Put('updateTonKho/:machinhanh/:masanpham')
+  @ApiOperation({ summary: 'Cập nhật tồn kho của sản phẩm trong chi nhánh nhà thuốc' })
+  async updateTonKho(
+    @Param('machinhanh') machinhanh: string,
+    @Param('masanpham') masanpham: string,
+    @Body() capNhatTonKho: CapNhatTonKhoDto): Promise<NhaThuoc_SanPham> {
+    return await this.pharmacyProductService.updateTonKho(machinhanh, masanpham, capNhatTonKho);  
   }
 }
