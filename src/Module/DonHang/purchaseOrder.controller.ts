@@ -14,10 +14,12 @@ import {
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import * as fs from 'fs-extra';
 
 import { PurchaseOrderService } from './purchaseOrder.service';
 import { OrderDetailsDto } from './dto/orderDetals.dto';
 import { CreatePaymentDto } from './dto/createPaymen.dto';
+import { PDFService } from './pdf.service';
 
 import { PaymentMethod } from 'src/common/Enum/payment-method.enum';
 import { StatusPurchase } from 'src/common/Enum/status-purchase.enum';
@@ -32,10 +34,10 @@ import { UpdateStatusDto } from './dto/updateStatusDto';
 
 @ApiTags('Purchase Order')
 @Controller('purchase-order')
-export class PurchaseOrderController {
-  constructor(
+export class PurchaseOrderController {  constructor(
     private readonly purchaseOrderService: PurchaseOrderService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly pdfService: PDFService
   ) { }
 
   @Post('createNewPurchaseOrder')
@@ -399,5 +401,47 @@ async updateOrderStatus(
     throw new HttpException('Order ID or status is missing', HttpStatus.BAD_REQUEST);
   }
   return this.purchaseOrderService.updateStatus(madonhang, body.status);
-}
+}  @Public()
+  @Get('generate-invoice/:madonhang')
+  async generateInvoice(
+    @Param('madonhang') madonhang: string,
+    @Res() res: Response
+  ) {
+    try {
+      // Get order details using the existing method
+      const orderDetails = await this.purchaseOrderService.getOrderDetailsByMadonhang(madonhang);
+      
+      if (!orderDetails || orderDetails.length === 0) {
+        throw new NotFoundException(`Order with ID ${madonhang} not found`);
+      }
+      
+      // Extract the first result as our order data
+      const orderData = orderDetails[0];
+      
+      // Generate the PDF invoice
+      const pdfFilePath = await this.pdfService.generateInvoice(orderData);
+      
+      // Set appropriate headers for file download
+      const filename = `invoice_${madonhang}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      
+      // Stream the file as response
+      const fileStream = fs.createReadStream(pdfFilePath);
+      fileStream.pipe(res);
+      
+      // Clean up the temporary file after sending
+      fileStream.on('end', () => {
+        fs.unlink(pdfFilePath, (err) => {
+          if (err) console.error('Error deleting temporary PDF file:', err);
+        });
+      });
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      throw new HttpException(
+        error.message ?? 'Error generating invoice',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }

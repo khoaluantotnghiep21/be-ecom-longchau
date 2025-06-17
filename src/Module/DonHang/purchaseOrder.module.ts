@@ -5,10 +5,11 @@ import { PurchaseOrderService } from './purchaseOrder.service';
 import { PurchaseOrderController } from './purchaseOrder.controller';
 import { AuthGuard } from 'src/guards/auth.guards';
 import { IdentityUser } from '../IdentityUser/identityuser.entity';
+import { PDFService } from './pdf.service';
 
 @Module({
   imports: [SequelizeModule.forFeature([PurchaseOrder, IdentityUser])],
-  providers: [PurchaseOrderService ,AuthGuard],
+  providers: [PurchaseOrderService, PDFService, AuthGuard],
   controllers: [PurchaseOrderController],
   exports: [AuthGuard]
 })
