@@ -13,9 +13,6 @@ export class Promotion extends Model{
     giatrikhuyenmai: number;
 
     @Column
-    donviapdung: string;
-
-    @Column
     ngaybatdau: Date;
 
     @Column

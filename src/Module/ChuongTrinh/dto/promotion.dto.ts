@@ -9,9 +9,6 @@ export class PromotionDto{
     giatrikhuyenmai: number;
 
     @ApiProperty()
-    donviapdung: string;
-
-    @ApiProperty()
     ngaybatdau: Date;
 
     @ApiProperty()
