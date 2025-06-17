@@ -11,9 +11,6 @@ export class Voucher extends Model{
     mavoucher: string;
 
     @Column
-    loaivoucher: boolean;
-
-    @Column
     soluong: number;
 
     @Column
@@ -24,4 +21,10 @@ export class Voucher extends Model{
 
     @Column
     giatri: number;
+
+    @Column
+    created_at: Date;
+
+    @Column
+    updated_at: Date;
 }
