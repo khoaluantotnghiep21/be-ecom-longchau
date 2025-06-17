@@ -21,7 +21,7 @@ export class VoucherService {
     }
 
     async updateVoucher(mavoucher: string, updateVoucherDto: CreateVoucherDto): Promise<Voucher> {
-        const voucher = await this.voucherRepo.findByPk(mavoucher);
+        const voucher = await this.voucherRepo.findOne({ where: { mavoucher } });
         if (!voucher) {
             throw new Error('Voucher not found');
         }
@@ -30,7 +30,7 @@ export class VoucherService {
     }
     
     async deleteVoucher(mavoucher: string): Promise<boolean> {
-        const voucher = await this.voucherRepo.findByPk(mavoucher);
+        const voucher = await this.voucherRepo.findOne({ where: { mavoucher } });
         if (!voucher) {
             throw new Error('Voucher not found');
         }

@@ -5,9 +5,6 @@ export class UpdateVoucherDto {
     mavoucher: string;
 
     @ApiProperty()
-    loaivoucher: boolean;
-
-    @ApiProperty()
     soluong: number;
 
     @ApiProperty()
@@ -18,4 +15,10 @@ export class UpdateVoucherDto {
 
     @ApiProperty()
     giatri: number;
+
+    @ApiProperty()
+    created_at: Date;
+
+    @ApiProperty()
+    updated_at: Date;
 }
