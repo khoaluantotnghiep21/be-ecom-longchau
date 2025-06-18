@@ -401,7 +401,9 @@ async updateOrderStatus(
     throw new HttpException('Order ID or status is missing', HttpStatus.BAD_REQUEST);
   }
   return this.purchaseOrderService.updateStatus(madonhang, body.status);
-}  @Public()
+}  
+
+  @Public()
   @Get('generate-invoice/:madonhang')
   async generateInvoice(
     @Param('madonhang') madonhang: string,

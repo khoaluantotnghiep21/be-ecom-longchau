@@ -68,10 +68,9 @@ export class PharmacyProductController {
 
   @Get('getIdPharmacyProductById:id')
   @Public()
-  @ApiOperation({ summary: 'Lấy thông tin sản phẩm nhà thuốc theo ID' })
-  @ApiParam({ name: 'id', description: 'ID của thông tin sản phẩm nhà thuốc' })
-  async getPharmacyProductById(@Param('id') id: string): Promise<NhaThuoc_SanPham> {
-    return await this.pharmacyProductService.getPharmacyProductById(id);
+  @ApiOperation({ summary: 'Lấy thông tin sản phẩm nhà thuốc theo mã chi nhánh ' })
+  async getPharmacyProductById(@Param('machinhanh') machinhanh: string): Promise<any[]> {
+    return await this.pharmacyProductService.getPharmacyProductById(machinhanh);
   }
 
   @Get('getListPharmacyProducts')

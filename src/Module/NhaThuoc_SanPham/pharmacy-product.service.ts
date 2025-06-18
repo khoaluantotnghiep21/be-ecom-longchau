@@ -71,12 +71,37 @@ export class PharmacyProductService {
    * @param id ID của thông tin sản phẩm nhà thuốc
    * @returns Thông tin sản phẩm nhà thuốc
    */
-  async getPharmacyProductById(id: string): Promise<NhaThuoc_SanPham> {
-    const pharmacyProduct = await this.pharmacyProductModel.findByPk(id);
-    if (!pharmacyProduct) {
-      throw new NotFoundException(`Không tìm thấy thông tin sản phẩm nhà thuốc với ID ${id}`);
-    }
-    return pharmacyProduct;
+  async getPharmacyProductById(machinhanh: string): Promise<any[]> {
+    const result = await this.sequelize.query(
+      `
+      SELECT 
+      nsp.manhaphang,
+      nsp.ngaygui,
+      nsp.tinhtrang,
+      u.hoten AS nguoi_gui,
+      JSON_AGG(
+        JSON_BUILD_OBJECT(
+          'machinhanh', nsp.machinhanh,
+          'masanpham', nsp.masanpham,
+          'soluong', nsp.soluong,
+          'tensanpham', sp.tensanpham
+        )
+      ) AS danhsach_sanpham
+      FROM nhathuoc_sanpham nsp
+      where nsp.machinhanh = :machinhanh
+      JOIN sanpham sp ON nsp.masanpham = sp.masanpham
+      JOIN identityuser u ON nsp.userid = u.id
+      GROUP BY nsp.manhaphang, nsp.ngaygui, nsp.tinhtrang, u.hoten
+      ORDER BY nsp.ngaygui DESC;
+          `
+      ,
+      {
+        replacements: { machinhanh },
+        type: QueryTypes.SELECT,
+      }
+    );
+    
+    return result;
   }
 
   /**

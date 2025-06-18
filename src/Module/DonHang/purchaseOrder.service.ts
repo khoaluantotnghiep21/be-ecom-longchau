@@ -90,6 +90,7 @@ export class PurchaseOrderService {
             `       
            SELECT 
             d.madonhang, 
+            d.ngaymuahang,
             i.hoten,
             d.thanhtien,
             d.trangthai,
@@ -108,7 +109,7 @@ export class PurchaseOrderService {
             JOIN sanpham s ON ct.masanpham = s.masanpham
             JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
             WHERE i.id = :userid
-            GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai
+            GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai, d.ngaymuahang
             `,
             {
                 replacements: { userid },
@@ -125,6 +126,7 @@ export class PurchaseOrderService {
             `
         SELECT 
             d.madonhang, 
+            d.ngaymuahang,
             i.hoten,
             d.thanhtien,
             d.trangthai,
@@ -142,7 +144,7 @@ export class PurchaseOrderService {
         JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
         JOIN sanpham s ON ct.masanpham = s.masanpham
         JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
-        GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai
+        GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai. d.ngaymuahang
         `,
             {
                 raw: true,
