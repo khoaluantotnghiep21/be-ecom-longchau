@@ -453,4 +453,10 @@ export class PurchaseOrderController {
   async getOrdersByVoucher(@Param('mavoucher') mavoucher: string) {
     return this.purchaseOrderService.getOrdersByVoucher(mavoucher);
   }
+
+  @Public()
+  @Get('stats/revenue/:type')
+  async getRevenueStats(@Param('type') type: 'day' | 'week' | 'month') {
+    return this.purchaseOrderService.getRevenueStats(type);
+  }
 }

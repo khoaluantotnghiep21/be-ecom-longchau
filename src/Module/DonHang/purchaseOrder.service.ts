@@ -160,78 +160,49 @@ export class PurchaseOrderService {
     }
 
     async getOrderDetailsByMadonhang(madonhang: string): Promise<any> {
-        console.log('Received madonhang:', madonhang);
-        const order = await this.purchaseOrderRepo.findOne({ where: { madonhang } });
+        const order = await this.purchaseOrderRepo.findOne({where: { madonhang }});
         if (!order) {
             throw new NotFoundException(`Order with ID ${madonhang} not found`);
         }
 
         const [results] = await this.sequelize.query(
             `       
-      SELECT 
-        d.madonhang, 
-        i.hoten,
-        d.machinhanh,
-        d.ngaymuahang,
-        g.nguoinhan,
-        g.diachinguoinhan,
-        g.thoigiannhan,
-        g.sodienthoainguoinhan,
-        i.sodienthoai,
-        i.diachi,
-        d.thanhtien, 
-        d.tongtien, 
-        d.giamgiatructiep, 
-        d.phivanchuyen, 
-        d.phuongthucthanhtoan, 
-        d.mavoucher, 
-        d.hinhthucnhanhang,
-        d.trangthai,
-        json_agg(
-          json_build_object(
-            'tensanpham', s.tensanpham,
-            'donvitinh', ct.donvitinh,
-            'soluong', ct.soluong,
-            'giaban', ct.giaban,
-            'url', a.url
-          )
-        ) AS sanpham
-      FROM identityuser i
-      JOIN donhang d ON i.id = d.userid
-      JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
-      LEFT JOIN giaohang g ON g.madonhang = d.madonhang
-      JOIN sanpham s ON ct.masanpham = s.masanpham
-      JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
-      WHERE d.madonhang = :madonhang
-      GROUP BY 
-        d.madonhang, 
-        d.machinhanh, 
-        g.nguoinhan, 
-        g.diachinguoinhan, 
-        g.thoigiannhan, 
-        g.sodienthoainguoinhan, 
-        i.hoten, 
-        i.sodienthoai, 
-        i.diachi, 
-        d.thanhtien, 
-        d.trangthai, 
-        d.ngaymuahang, 
-        d.tongtien, 
-        d.giamgiatructiep, 
-        d.phivanchuyen, 
-        d.phuongthucthanhtoan, 
-        d.mavoucher, 
-        d.hinhthucnhanhang
-      `,
+           SELECT 
+            d.madonhang, 
+            i.hoten,
+            d.machinhanh,
+            d.ngaymuahang,
+            g.nguoinhan,
+            i.sodienthoai,
+            i.diachi,
+            d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
+            d.trangthai,
+            json_agg(
+                json_build_object(
+                'tensanpham', s.tensanpham,
+                'donvitinh', ct.donvitinh,
+                'soluong', ct.soluong,
+                'giaban', ct.giaban,
+                'url', a.url
+                )
+            ) AS sanpham
+            FROM identityuser i
+            JOIN donhang d ON i.id = d.userid
+            JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
+            LEFT JOIN giaohang g ON g.madonhang = d.madonhang
+            JOIN sanpham s ON ct.masanpham = s.masanpham
+            JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
+            WHERE d.madonhang = :madonhang
+            GROUP BY d.madonhang,d.machinhanh,g.diachinguoinhan,g.thoigiannhan,g.nguoinhan, g.sodienthoainguoinhan,i.hoten, i.sodienthoai, i.diachi, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang
+            `,
             {
                 replacements: { madonhang },
                 raw: true,
-                plain: false,
+                plain: false 
             }
         );
 
-        console.log('Order details result:', results);
-        return results[0] || {};
+        return results;
     }
 
     async getOrderDetailsByMaChiNhanh(machinhanh: string): Promise<any> {
@@ -287,7 +258,7 @@ export class PurchaseOrderService {
             throw new NotFoundException('Voucher code is required');
         }
 
-      
+
         const voucher = await this.voucherRepo.findOne({
             where: { mavoucher: { [Op.iLike]: mavoucher } },
         });
@@ -296,13 +267,31 @@ export class PurchaseOrderService {
             throw new NotFoundException(`Voucher with code ${mavoucher} not found`);
         }
 
-     
+
         const orders = await this.purchaseOrderRepo.findAll({
             where: { mavoucher: { [Op.iLike]: mavoucher } },
         });
         console.log('Orders found:', orders.map(order => order.toJSON()));
 
         return orders;
+    }
+
+    async getRevenueStats(type: 'day' | 'week' | 'month'): Promise<any> {
+        let groupBy = '';
+        if (type === 'day') groupBy = "DATE(ngaymuahang)";
+        else if (type === 'week') groupBy = "EXTRACT(WEEK FROM ngaymuahang)";
+        else if (type === 'month') groupBy = "EXTRACT(MONTH FROM ngaymuahang)";
+
+        const [result] = await this.sequelize.query(
+            `
+    SELECT ${groupBy} as period, SUM(thanhtien) as total_revenue, COUNT(*) as total_orders
+    FROM donhang
+    WHERE trangthai = 'Confirmed'
+    GROUP BY period
+    ORDER BY period DESC
+    `
+        );
+        return result;
     }
 }
 
