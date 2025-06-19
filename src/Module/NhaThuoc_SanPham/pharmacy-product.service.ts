@@ -125,7 +125,6 @@ export class PharmacyProductService {
         )
       ) AS danhsach_sanpham
       FROM nhathuoc_sanpham nsp
-      where nsp.tinhtrang = 'Đã xác nhận đơn hàng'
       JOIN sanpham sp ON nsp.masanpham = sp.masanpham
       JOIN identityuser u ON nsp.userid = u.id
       GROUP BY nsp.manhaphang, nsp.ngaygui, nsp.tinhtrang, u.hoten
@@ -157,7 +156,7 @@ export class PharmacyProductService {
       FROM nhathuoc_sanpham nsp
       JOIN sanpham sp ON nsp.masanpham = sp.masanpham
       JOIN identityuser u ON nsp.userid = u.id
-      WHERE nsp.machinhanh = :machinhanh
+      WHERE nsp.machinhanh = :machinhanh and nsp.tinhtrang = 'Đã xác nhận đơn hàng'
       ORDER BY nsp.ngaygui DESC
       `,
       {

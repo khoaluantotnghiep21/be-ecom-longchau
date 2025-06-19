@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-
+import { Transform } from 'class-transformer';
 // DTO cho từng cặp sản phẩm và số lượng
 export class ProductQuantityDto {
   @ApiProperty({
@@ -12,12 +12,13 @@ export class ProductQuantityDto {
   @IsString()
   masanpham: string;
 
-  @ApiProperty({
+ @ApiProperty({
     description: 'Số lượng sản phẩm',
     example: 100
   })
   @IsNotEmpty({ message: 'Số lượng không được để trống' })
-  @IsNumber()
+  @Transform(({ value }) => Number(value)) // <-- Ép sang number
+  @IsNumber({}, { message: 'Số lượng phải là số' })
   soluong: number;
 }
 
