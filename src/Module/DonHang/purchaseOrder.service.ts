@@ -35,7 +35,7 @@ export class PurchaseOrderService {
         const orderId = (await this.countOrders() + 1).toString().padStart(4, '0');
         const madonhang = `DH${todayStr.replace(/-/g, '')}${orderId}`;
         const t = await this.sequelize.transaction();
-        const createat = new Date();
+        const createdat = new Date();
         try {
             // 1. Thêm đơn hàng trước
             const data = {
@@ -44,7 +44,7 @@ export class PurchaseOrderService {
                 userid,
                 trangthai,
                 ...orderDetailDto,
-                createat,
+                createdat,
             };
 
             const newOrder = await this.purchaseOrderRepo.create(data, { transaction: t });
@@ -101,6 +101,7 @@ export class PurchaseOrderService {
             i.hoten,
             d.thanhtien,
             d.trangthai,
+            d.createdat,
             json_agg(
                 json_build_object(
                 'tensanpham', s.tensanpham,
@@ -116,7 +117,8 @@ export class PurchaseOrderService {
             JOIN sanpham s ON ct.masanpham = s.masanpham
             JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
             WHERE i.id = :userid
-            GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai, d.ngaymuahang
+            GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai, d.ngaymuahang, d.createdat
+            ORDER BY d.createdat DESC
             `,
             {
                 replacements: { userid },
@@ -137,6 +139,7 @@ export class PurchaseOrderService {
             i.hoten,
             d.thanhtien,
             d.trangthai,
+            d.createdat,
             json_agg(
                 json_build_object(
                     'tensanpham', s.tensanpham,
@@ -151,7 +154,8 @@ export class PurchaseOrderService {
         JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
         JOIN sanpham s ON ct.masanpham = s.masanpham
         JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
-        GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai, d.ngaymuahang
+        GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai, d.ngaymuahang, d.createdat
+        ORDER BY d.createdat DESC
         `,
             {
                 raw: true,
@@ -180,7 +184,10 @@ export class PurchaseOrderService {
             g.thoigiandukien,
             i.sodienthoai,
             i.diachi,
-            d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
+            d.thanhtien, d.ngaymuahang, 
+            d.tongtien, d.giamgiatructiep, 
+            d.phivanchuyen, d.phuongthucthanhtoan, 
+            d.mavoucher, d.hinhthucnhanhang,
             d.trangthai,
             json_agg(
                 json_build_object(
