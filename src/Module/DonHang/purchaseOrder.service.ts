@@ -144,7 +144,7 @@ export class PurchaseOrderService {
         JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
         JOIN sanpham s ON ct.masanpham = s.masanpham
         JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
-        GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai. d.ngaymuahang
+        GROUP BY d.madonhang, i.hoten, d.thanhtien, d.trangthai, d.ngaymuahang
         `,
             {
                 raw: true,
