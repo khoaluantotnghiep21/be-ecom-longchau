@@ -9,10 +9,10 @@ export class VoucherService {
     constructor(
         @InjectModel(Voucher)
         private readonly voucherRepo: Repository<Voucher>,
-    ) {}
+    ) { }
 
     async createVoucher(createVoucherDto: CreateVoucherDto): Promise<Voucher> {
-        const data ={...createVoucherDto};
+        const data = { ...createVoucherDto };
         return await this.voucherRepo.create(data as any);
     }
 
@@ -28,7 +28,7 @@ export class VoucherService {
         voucher.set(updateVoucherDto);
         return await voucher.save();
     }
-    
+
     async deleteVoucher(mavoucher: string): Promise<boolean> {
         const voucher = await this.voucherRepo.findOne({ where: { mavoucher } });
         if (!voucher) {
@@ -36,5 +36,13 @@ export class VoucherService {
         }
         await voucher.destroy();
         return true;
+    }
+
+    async getVoucherByMaVoucher(mavoucher: string): Promise<Voucher> {
+        const voucher = await this.voucherRepo.findOne({ where: { mavoucher } });
+        if (!voucher) {
+            throw new Error('Voucher not found');
+        }
+        return voucher;
     }
 }
