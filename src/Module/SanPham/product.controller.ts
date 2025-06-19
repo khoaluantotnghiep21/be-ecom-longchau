@@ -58,7 +58,11 @@ export class SanPhamController {
   ): Promise<SanPham> {
     return await this.sanPhamService.updateProduct(masanpham, updateProductDto);
   }
-
+  @Public()
+  @Get('findProductBySlug/:slug')
+  async findProductBySlug(@Param('slug') slug: string): Promise<SanPham> {
+    return await this.sanPhamService.findProductBySlug(slug);
+  }
   @Roles(Role.Admin, Role.Staff)
   @Delete('deleteProduct/:masanpham')
   async delete(@Param('masanpham') masanpham: string) {

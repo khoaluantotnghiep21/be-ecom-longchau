@@ -250,7 +250,48 @@ export class SanPhamService {
     await danhmuc.save();
     return this.sanPhamModel.destroy({ where: { masanpham } });
   }
-
+  async findProductBySlug(slug: string): Promise<SanPham> {
+    const rawProduct = await this.sanPhamModel.findOne({
+      where: { slug },
+      include: [
+        { model: DanhMuc, attributes: ['tendanhmuc', 'slug'] },
+        { model: ThuongHieu, attributes: ['tenthuonghieu'] },
+        { model: Promotion, attributes: ['tenchuongtrinh', 'giatrikhuyenmai'] },
+        { model: Media, attributes: ['url', 'ismain'] },
+        {
+          model: UnitDetals,
+          as: 'chitietdonvi',
+          attributes: ['dinhluong', 'giaban'],
+          include: [{ model: Unit, attributes: ['donvitinh'] }],
+        },
+        {
+          model: IngredientDetals,
+          as: 'chitietthanhphan',
+          attributes: ['hamluong'],
+          include: [{ model: Ingredient, attributes: ['tenthanhphan'] }],
+        },
+      ],
+      raw: false,
+      nest: true,
+    });
+  
+    if (!rawProduct) {
+      throw new Error('Product not found');
+    }
+  
+    const product = rawProduct.get({ plain: true });
+  
+    const khuyenmai = product.khuyenmai?.giatrikhuyenmai ?? 0;
+    if (product.chitietdonvi && Array.isArray(product.chitietdonvi)) {
+      product.chitietdonvi = product.chitietdonvi.map((donvi: any) => ({
+        ...donvi,
+        giabanSauKhuyenMai: donvi.giaban - (donvi.giaban * (khuyenmai / 100)),
+      }));
+    }
+  
+    return product;
+  }
+  
   async searchProducts(query: string, page?: number, take?: number) {
     if (!query) {
       throw new Error('Query is required');
