@@ -581,16 +581,20 @@ export class PharmacyProductService {
   async getImportStatsByProduct(type: 'day' | 'week' | 'month'): Promise<any[]> {
     let groupBy = '';
     let selectPeriod = '';
+    let orderBy = '';
 
     if (type === 'day') {
       groupBy = "DATE(nsp.ngaygui), nsp.masanpham, sp.tensanpham";
       selectPeriod = "DATE(nsp.ngaygui) as period";
+      orderBy = "period DESC, nsp.masanpham";
     } else if (type === 'week') {
       groupBy = "EXTRACT(YEAR FROM nsp.ngaygui), EXTRACT(WEEK FROM nsp.ngaygui), nsp.masanpham, sp.tensanpham";
       selectPeriod = "EXTRACT(YEAR FROM nsp.ngaygui) as year, EXTRACT(WEEK FROM nsp.ngaygui) as week";
+      orderBy = "year DESC, week DESC, nsp.masanpham";
     } else if (type === 'month') {
       groupBy = "EXTRACT(YEAR FROM nsp.ngaygui), EXTRACT(MONTH FROM nsp.ngaygui), nsp.masanpham, sp.tensanpham";
       selectPeriod = "EXTRACT(YEAR FROM nsp.ngaygui) as year, EXTRACT(MONTH FROM nsp.ngaygui) as month";
+      orderBy = "year DESC, month DESC, nsp.masanpham";
     } else {
       throw new BadRequestException('Loại thống kê không hợp lệ');
     }
@@ -605,7 +609,7 @@ export class PharmacyProductService {
     FROM nhathuoc_sanpham nsp
     JOIN sanpham sp ON nsp.masanpham = sp.masanpham
     GROUP BY ${groupBy}
-    ORDER BY period DESC, nsp.masanpham
+    ORDER BY ${orderBy}
     `
     );
     return result;
