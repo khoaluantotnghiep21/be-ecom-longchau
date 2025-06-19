@@ -23,7 +23,7 @@ export class PharmacyProductService {
     @InjectModel(IdentityUser)
     private readonly userModel: typeof IdentityUser,
     private readonly sequelize: Sequelize,
-  ) {}
+  ) { }
 
   /**
    * Thêm sản phẩm vào nhà thuốc
@@ -62,7 +62,7 @@ export class PharmacyProductService {
       manhaphang: this.generateImportCode(),
       userid,
       ngaygui: new Date(),
-      tinhtrang: 'Chưa duyệt', 
+      tinhtrang: 'Chưa duyệt',
     });
   }
 
@@ -100,7 +100,7 @@ export class PharmacyProductService {
         type: QueryTypes.SELECT,
       }
     );
-    
+
     return result;
   }
 
@@ -135,7 +135,7 @@ export class PharmacyProductService {
         type: QueryTypes.SELECT,
       }
     );
-    
+
     return result;
   }
 
@@ -164,7 +164,7 @@ export class PharmacyProductService {
         type: QueryTypes.SELECT,
       }
     );
-    
+
     return {
       success: true,
       data: result,
@@ -210,9 +210,9 @@ export class PharmacyProductService {
     if (!pharmacyProduct) {
       throw new NotFoundException(`Không tìm thấy thông tin sản phẩm nhà thuốc với ID ${id}`);
     }
-    
+
     await pharmacyProduct.destroy();
-    
+
     return {
       success: true,
       message: 'Xóa thông tin sản phẩm nhà thuốc thành công',
@@ -243,7 +243,7 @@ export class PharmacyProductService {
         type: QueryTypes.SELECT,
       }
     );
-    
+
     return result;
   }
 
@@ -254,27 +254,27 @@ export class PharmacyProductService {
    * @param userid ID của người dùng đang đăng nhập
    * @returns Thông tin sản phẩm nhà thuốc đã cập nhật
    */
-async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
-  const found = await this.pharmacyProductModel.findAll({
-    where: { manhaphang },
-  });
+  async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
+    const found = await this.pharmacyProductModel.findAll({
+      where: { manhaphang },
+    });
 
-  if (!found || found.length === 0) {
-    throw new NotFoundException(`Không tìm thấy sản phẩm với mã nhập hàng: ${manhaphang}`);
+    if (!found || found.length === 0) {
+      throw new NotFoundException(`Không tìm thấy sản phẩm với mã nhập hàng: ${manhaphang}`);
+    }
+
+    await this.pharmacyProductModel.update(
+      { tinhtrang: 'Đã xác nhận đơn hàng' },
+      { where: { manhaphang } }
+    );
+
+    // Lấy lại dữ liệu sau khi update để đảm bảo đồng bộ
+    const updated = await this.pharmacyProductModel.findAll({
+      where: { manhaphang },
+    });
+
+    return updated;
   }
-
-  await this.pharmacyProductModel.update(
-    { tinhtrang: 'Đã xác nhận đơn hàng' },
-    { where: { manhaphang } }
-  );
-
-  // Lấy lại dữ liệu sau khi update để đảm bảo đồng bộ
-  const updated = await this.pharmacyProductModel.findAll({
-    where: { manhaphang },
-  });
-
-  return updated;
-}
 
 
 
@@ -326,14 +326,14 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
 
     // Danh sách mã sản phẩm để kiểm tra tồn tại
     const productCodes = products.map((p) => p.masanpham?.trim());
-    
+
     // In ra log để debug
     console.log('Tìm kiếm các mã sản phẩm:', JSON.stringify(productCodes));
 
     // Sử dụng Op.in để tìm kiếm
     const { Op } = require('sequelize');
     const existingProducts = await this.productModel.findAll({
-      where: { 
+      where: {
         masanpham: {
           [Op.in]: productCodes
         }
@@ -359,12 +359,12 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
           // Kiểm tra sản phẩm tồn tại
           const trimmedCode = product.masanpham?.trim();
           console.log(`Đang kiểm tra sản phẩm với mã: '${trimmedCode}'`);
-          
+
           let foundProduct = productMap.get(trimmedCode);
-          
+
           if (!foundProduct) {
             console.log(`Không tìm thấy sản phẩm với mã: '${trimmedCode}' trong map, thử tìm trực tiếp...`);
-            
+
             // Thử tìm kiếm trực tiếp từ database một lần nữa
             try {
               // Tìm kiếm chính xác
@@ -377,11 +377,11 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
                 const { Op } = require('sequelize');
                 const allProductsWithSimilarCode = await this.productModel.findAll({
                   where: Sequelize.where(
-                    Sequelize.fn('LOWER', Sequelize.col('masanpham')), 
+                    Sequelize.fn('LOWER', Sequelize.col('masanpham')),
                     Sequelize.fn('LOWER', trimmedCode)
                   )
                 });
-                
+
                 if (allProductsWithSimilarCode && allProductsWithSimilarCode.length > 0) {
                   foundProduct = allProductsWithSimilarCode[0];
                   console.log(`Tìm thấy sản phẩm với mã tương tự (case insensitive): ${foundProduct.masanpham}`);
@@ -390,7 +390,7 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
             } catch (searchError) {
               console.error(`Lỗi khi tìm kiếm sản phẩm: ${searchError.message}`);
             }
-            
+
             if (foundProduct) {
               console.log(`Tìm thấy sản phẩm qua truy vấn trực tiếp: ${foundProduct.masanpham}, ID: ${foundProduct.id}`);
               productMap.set(trimmedCode, foundProduct);
@@ -414,10 +414,10 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
 
           if (existingPharmacyProduct) {
             // Nếu đã tồn tại, cập nhật số lượng
-          
-            existingPharmacyProduct.set({soluong: existingPharmacyProduct.dataValues.soluong + product.soluong, userid, ngaygui: new Date()} );
+
+            existingPharmacyProduct.set({ soluong: existingPharmacyProduct.dataValues.soluong + product.soluong, userid, ngaygui: new Date() });
             await existingPharmacyProduct.save();
-            
+
             result.updatedProducts++;
             result.details.updated.push(existingPharmacyProduct);
           } else {
@@ -431,7 +431,7 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
               ngaygui: new Date(),
               tinhtrang: 'Chưa duyệt',
             });
-            
+
             result.createdProducts++;
             result.details.created.push(newPharmacyProduct);
           }
@@ -448,7 +448,7 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
     // Tạo thông báo tổng hợp
     result.message = `Đã xử lý ${result.totalProducts} sản phẩm trong lô ${batchImportCode}: ${result.createdProducts} mới, ${result.updatedProducts} cập nhật, ${result.failedProducts} thất bại.`;
     result.success = result.failedProducts < result.totalProducts; // Thành công nếu ít nhất 1 sản phẩm được xử lý
-    
+
     return result;
   }
 
@@ -462,7 +462,7 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
   async checkProduct(masanpham: string): Promise<any> {
     const { Op } = require('sequelize');
     const trimmedCode = masanpham.trim();
-    
+
     // Tìm kiếm chính xác
     const exactMatch = await this.productModel.findOne({
       where: { masanpham: trimmedCode }
@@ -470,9 +470,9 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
 
     // Tìm kiếm gần đúng
     const similarMatches = await this.productModel.findAll({
-      where: { 
+      where: {
         masanpham: {
-          [Op.like]: `%${trimmedCode}%` 
+          [Op.like]: `%${trimmedCode}%`
         }
       },
       limit: 10
@@ -500,23 +500,23 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
    */
   async checkUnitDetails(masanpham: string[]): Promise<any> {
     const result = {};
-    
+
     for (const msp of masanpham) {
       // Kiểm tra sản phẩm tồn tại
       const product = await this.productModel.findOne({
         where: { masanpham: msp },
         attributes: ['id', 'masanpham', 'tensanpham']
       });
-      
+
       if (!product) {
-        result[msp] = { 
-          exists: false, 
+        result[msp] = {
+          exists: false,
           message: 'Sản phẩm không tồn tại',
           details: null
         };
         continue;
       }
-      
+
       // Truy vấn trực tiếp bảng chi tiết đơn vị
       const unitDetails = await this.sequelize.query(
         `SELECT ud.*, u.donvitinh 
@@ -528,7 +528,7 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
           type: QueryTypes.SELECT,
         }
       );
-      
+
       result[msp] = {
         exists: true,
         product: {
@@ -541,7 +541,7 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
         unitDetails: unitDetails
       };
     }
-    
+
     return result;
   }
 
@@ -556,10 +556,10 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const dateStr = `${year}${month}${day}`;
-    
+
     // Tạo số ngẫu nhiên 4 chữ số
     const randomNum = Math.floor(1000 + Math.random() * 9000);
-    
+
     // Tạo mã nhập hàng theo định dạng NH-YYYYMMDD-XXXX
     return `NH-${dateStr}-${randomNum}`;
   }
@@ -572,8 +572,45 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
     if (!product) {
       throw new NotFoundException(`Không tìm thấy sản phẩm với mã ${masanpham} trong chi nhánh ${machinhanh}`);
     }
-   product.set({soluong: capNhatTonKho.soluongtonkho})
-   await product.save();
+    product.set({ soluong: capNhatTonKho.soluongtonkho })
+    await product.save();
     return product;
+  }
+
+  async getImportStatsByProduct(type: 'day' | 'week' | 'month'): Promise<any[]> {
+    let groupBy = '';
+    let selectPeriod = '';
+    let orderBy = '';
+
+    if (type === 'day') {
+      groupBy = "DATE(nsp.ngaygui), nsp.masanpham, sp.tensanpham";
+      selectPeriod = "DATE(nsp.ngaygui) as period";
+      orderBy = "period DESC, nsp.masanpham";
+    } else if (type === 'week') {
+      groupBy = "EXTRACT(YEAR FROM nsp.ngaygui), EXTRACT(WEEK FROM nsp.ngaygui), nsp.masanpham, sp.tensanpham";
+      selectPeriod = "EXTRACT(YEAR FROM nsp.ngaygui) as year, EXTRACT(WEEK FROM nsp.ngaygui) as week";
+      orderBy = "year DESC, week DESC, nsp.masanpham";
+    } else if (type === 'month') {
+      groupBy = "EXTRACT(YEAR FROM nsp.ngaygui), EXTRACT(MONTH FROM nsp.ngaygui), nsp.masanpham, sp.tensanpham";
+      selectPeriod = "EXTRACT(YEAR FROM nsp.ngaygui) as year, EXTRACT(MONTH FROM nsp.ngaygui) as month";
+      orderBy = "year DESC, month DESC, nsp.masanpham";
+    } else {
+      throw new BadRequestException('Loại thống kê không hợp lệ');
+    }
+
+    const [result] = await this.sequelize.query(
+      `
+    SELECT 
+      ${selectPeriod},
+      nsp.masanpham,
+      sp.tensanpham,
+      SUM(nsp.soluong) as total_imported
+    FROM nhathuoc_sanpham nsp
+    JOIN sanpham sp ON nsp.masanpham = sp.masanpham
+    GROUP BY ${groupBy}
+    ORDER BY ${orderBy}
+    `
+    );
+    return result;
   }
 }

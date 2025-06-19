@@ -291,7 +291,7 @@ export class PurchaseOrderService {
             `
     SELECT ${groupBy} as period, SUM(thanhtien) as total_revenue, COUNT(*) as total_orders
     FROM donhang
-    WHERE trangthai = 'Confirmed'
+    WHERE trangthai = 'Đã xác nhận'
     GROUP BY period
     ORDER BY period DESC
     `
