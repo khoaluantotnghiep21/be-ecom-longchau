@@ -55,17 +55,6 @@ export class PharmacyProductController {
     return await this.pharmacyProductService.createMultipleProducts(multiProductsDto, userid);
   }
 
-  @Post('createSimpleInput')
-  @ApiOperation({ summary: 'Thêm nhiều sản phẩm vào nhà thuốc với mảng mã sản phẩm và số lượng riêng biệt' })
-  @ApiBody({ type: SimpleProductInputDto })
-  async createFromSimpleInput(
-    @Body() simpleInputDto: SimpleProductInputDto,
-    @Request() req
-  ) {
-    const userid = req['user']?.sub;
-    return await this.pharmacyProductService.createFromSimpleInput(simpleInputDto, userid);
-  }
-
   @Get('getIdPharmacyProductById:id')
   @Public()
   @ApiOperation({ summary: 'Lấy thông tin sản phẩm nhà thuốc theo mã chi nhánh ' })

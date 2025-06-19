@@ -125,6 +125,7 @@ export class PharmacyProductService {
         )
       ) AS danhsach_sanpham
       FROM nhathuoc_sanpham nsp
+      where nsp.tinhtrang = 'Đã xác nhận đơn hàng'
       JOIN sanpham sp ON nsp.masanpham = sp.masanpham
       JOIN identityuser u ON nsp.userid = u.id
       GROUP BY nsp.manhaphang, nsp.ngaygui, nsp.tinhtrang, u.hoten
@@ -414,9 +415,8 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
 
           if (existingPharmacyProduct) {
             // Nếu đã tồn tại, cập nhật số lượng
-            existingPharmacyProduct.soluong += product.soluong;
-            existingPharmacyProduct.userid = userid;
-            existingPharmacyProduct.ngaygui = new Date();
+          
+            existingPharmacyProduct.set({soluong: existingPharmacyProduct.dataValues.soluong + product.soluong, userid, ngaygui: new Date()} );
             await existingPharmacyProduct.save();
             
             result.updatedProducts++;
@@ -454,134 +454,6 @@ async updateProductStatus(manhaphang: string): Promise<NhaThuoc_SanPham[]> {
   }
 
 
-
-
-  /**
-   * Thêm nhiều sản phẩm vào nhà thuốc sử dụng mảng mã sản phẩm và số lượng riêng biệt
-   * @param simpleInputDto Đầu vào đơn giản với mảng mã sản phẩm và mảng số lượng
-   * @param userid ID của người dùng đang đăng nhập
-   * @returns Kết quả xử lý thêm sản phẩm
-   */
-  async createFromSimpleInput(
-    simpleInputDto: SimpleProductInputDto,
-    userid: string
-  ): Promise<{
-    success: boolean;
-    message: string;
-    manhaphang: string;
-    totalProducts: number;
-    createdProducts: number;
-    updatedProducts: number;
-    failedProducts: number;
-    details: {
-      created: NhaThuoc_SanPham[];
-      updated: NhaThuoc_SanPham[];
-      failed: { masanpham: string; soluong: number; reason: string }[];
-    };
-  }> {
-    const { machinhanh, masanpham, soluong } = simpleInputDto;
-    
-    // Kiểm tra mảng masanpham và soluong có cùng độ dài không
-    if (masanpham.length !== soluong.length) {
-      throw new BadRequestException('Mảng mã sản phẩm và số lượng phải có cùng độ dài');
-    }
-
-    // Tạo một mã nhập hàng duy nhất cho toàn bộ lô
-    const batchImportCode = this.generateImportCode();
-    console.log(`Tạo mã nhập hàng cho lô: ${batchImportCode}`);
-
-    // Kết quả thực hiện
-    const result = {
-      success: true,
-      message: '',
-      manhaphang: batchImportCode, // Thêm mã nhập hàng vào kết quả
-      totalProducts: masanpham.length,
-      createdProducts: 0,
-      updatedProducts: 0,
-      failedProducts: 0,
-      details: {
-        created: [] as NhaThuoc_SanPham[],
-        updated: [] as NhaThuoc_SanPham[],
-        failed: [] as { masanpham: string; soluong: number; reason: string }[],
-      },
-    };
-
-    // Danh sách mã sản phẩm để kiểm tra tồn tại
-    const existingProducts = await this.productModel.findAll({
-      where: { masanpham },
-    });
-
-    // Tạo map để tra cứu nhanh
-    const productMap = new Map();
-    existingProducts.forEach((product) => {
-      productMap.set(product.masanpham, product);
-    });
-
-    // Xử lý từng sản phẩm trong danh sách
-    await Promise.all(
-      masanpham.map(async (msp, index) => {
-        const sl = soluong[index];
-        try {
-          // Kiểm tra sản phẩm tồn tại
-          if (!productMap.has(msp)) {
-            result.failedProducts++;
-            result.details.failed.push({
-              masanpham: msp,
-              soluong: sl,
-              reason: `Không tìm thấy sản phẩm với mã ${msp}`,
-            });
-            return;
-          }
-
-          // Kiểm tra xem sản phẩm đã có trong nhà thuốc chưa
-          const existingPharmacyProduct = await this.pharmacyProductModel.findOne({
-            where: {
-              machinhanh,
-              masanpham: msp,
-            },
-          });
-
-          if (existingPharmacyProduct) {
-            // Nếu đã tồn tại, cập nhật số lượng
-            existingPharmacyProduct.soluong += sl;
-            existingPharmacyProduct.userid = userid;
-            existingPharmacyProduct.ngaygui = new Date();
-            await existingPharmacyProduct.save();
-            
-            result.updatedProducts++;
-            result.details.updated.push(existingPharmacyProduct);
-          } else {
-            // Tạo mới thông tin sản phẩm nhà thuốc
-            const newPharmacyProduct = await this.pharmacyProductModel.create({
-              machinhanh,
-              masanpham: msp,
-              soluong: sl,
-              manhaphang: batchImportCode, // Sử dụng cùng một mã nhập hàng cho toàn bộ lô
-              userid,
-              ngaygui: new Date(),
-              tinhtrang: 'Chưa duyệt',
-            });
-            
-            result.createdProducts++;
-            result.details.created.push(newPharmacyProduct);
-          }
-        } catch (error) {
-          result.failedProducts++;
-          result.details.failed.push({
-            masanpham: msp,
-            soluong: sl,
-            reason: `Lỗi khi xử lý: ${error.message}`,
-          });
-        }
-      })
-    );
-
-    // Tạo thông báo tổng hợp
-    result.message = `Đã xử lý ${result.totalProducts} sản phẩm trong lô ${batchImportCode}: ${result.createdProducts} mới, ${result.updatedProducts} cập nhật, ${result.failedProducts} thất bại.`;
-    result.success = result.failedProducts < result.totalProducts; // Thành công nếu ít nhất 1 sản phẩm được xử lý
-    
-    return result;
-  }
 
   /**
    * Kiểm tra sản phẩm có tồn tại trong cơ sở dữ liệu hay không
