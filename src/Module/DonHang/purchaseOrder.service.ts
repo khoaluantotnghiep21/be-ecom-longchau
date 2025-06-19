@@ -35,6 +35,7 @@ export class PurchaseOrderService {
         const orderId = (await this.countOrders() + 1).toString().padStart(4, '0');
         const madonhang = `DH${todayStr.replace(/-/g, '')}${orderId}`;
         const t = await this.sequelize.transaction();
+        const createat = new Date();
         try {
             // 1. Thêm đơn hàng trước
             const data = {
@@ -43,6 +44,7 @@ export class PurchaseOrderService {
                 userid,
                 trangthai,
                 ...orderDetailDto,
+                createat,
             };
 
             const newOrder = await this.purchaseOrderRepo.create(data, { transaction: t });

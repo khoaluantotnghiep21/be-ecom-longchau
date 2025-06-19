@@ -1,5 +1,6 @@
 import { Column, Model, PrimaryKey, Table, DataType, ForeignKey, CreatedAt } from 'sequelize-typescript';
 import { Voucher } from '../Voucher/voucher.entity';
+import { Timestamp } from 'rxjs';
 
 
 @Table({ tableName: 'donhang', timestamps: false })
@@ -52,7 +53,6 @@ export class PurchaseOrder extends Model {
   @Column
   trangthai: string;
 
-  @CreatedAt
   @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
-  declare createdAt: Date;
+  createdat: Date;
 }
