@@ -1,4 +1,4 @@
-import { Column, Model, PrimaryKey, Table, DataType, ForeignKey } from 'sequelize-typescript';
+import { Column, Model, PrimaryKey, Table, DataType, ForeignKey, CreatedAt } from 'sequelize-typescript';
 import { Voucher } from '../Voucher/voucher.entity';
 
 
@@ -8,7 +8,7 @@ export class PurchaseOrder extends Model {
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   declare id: string;
 
-@Column({
+  @Column({
     type: DataType.STRING,
     unique: true,
     allowNull: false,
@@ -51,4 +51,8 @@ export class PurchaseOrder extends Model {
 
   @Column
   trangthai: string;
+
+  @CreatedAt
+  @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
+  declare createdAt: Date;
 }

@@ -160,7 +160,7 @@ export class PurchaseOrderService {
     }
 
     async getOrderDetailsByMadonhang(madonhang: string): Promise<any> {
-        const order = await this.purchaseOrderRepo.findOne({where: { madonhang }});
+        const order = await this.purchaseOrderRepo.findOne({ where: { madonhang } });
         if (!order) {
             throw new NotFoundException(`Order with ID ${madonhang} not found`);
         }
@@ -170,9 +170,11 @@ export class PurchaseOrderService {
            SELECT 
             d.madonhang, 
             i.hoten,
+            g.diachinguoinhan,
             d.machinhanh,
-            d.ngaymuahang,
+            g.thoigiannhan,
             g.nguoinhan,
+            g.sodienthoainguoinhan,
             i.sodienthoai,
             i.diachi,
             d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
@@ -198,7 +200,7 @@ export class PurchaseOrderService {
             {
                 replacements: { madonhang },
                 raw: true,
-                plain: false 
+                plain: false
             }
         );
 
