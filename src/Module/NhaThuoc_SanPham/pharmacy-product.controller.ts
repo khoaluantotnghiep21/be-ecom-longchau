@@ -31,19 +31,19 @@ import { SimpleProductInputDto } from './dto/simple-product-input.dto';
 @Controller('pharmacy-product')
 @ApiBearerAuth('access-token')
 export class PharmacyProductController {
-  constructor(private readonly pharmacyProductService: PharmacyProductService) {}
+  constructor(private readonly pharmacyProductService: PharmacyProductService) { }
 
-//   @Post('createNewOrder')
-//   @ApiOperation({ summary: 'Thêm sản phẩm vào nhà thuốc' })
-//   @ApiBody({ type: PharmacyProductDto })
-//   async createPharmacyProduct(
-//     @Body() pharmacyProductDto: PharmacyProductDto,
-//     @Request() req
-//   ): Promise<NhaThuoc_SanPham> {
-//     const userid = req['user']?.sub;
-//     return await this.pharmacyProductService.createPharmacyProduct(pharmacyProductDto, userid);
-//   }
-  
+  //   @Post('createNewOrder')
+  //   @ApiOperation({ summary: 'Thêm sản phẩm vào nhà thuốc' })
+  //   @ApiBody({ type: PharmacyProductDto })
+  //   async createPharmacyProduct(
+  //     @Body() pharmacyProductDto: PharmacyProductDto,
+  //     @Request() req
+  //   ): Promise<NhaThuoc_SanPham> {
+  //     const userid = req['user']?.sub;
+  //     return await this.pharmacyProductService.createPharmacyProduct(pharmacyProductDto, userid);
+  //   }
+
   @Post('createMultipleProducts')
   @ApiOperation({ summary: 'Thêm nhiều sản phẩm vào nhà thuốc với cùng mã chi nhánh' })
   @ApiBody({ type: MultiProductsDto })
@@ -53,17 +53,6 @@ export class PharmacyProductController {
   ) {
     const userid = req['user']?.sub;
     return await this.pharmacyProductService.createMultipleProducts(multiProductsDto, userid);
-  }
-
-  @Post('createSimpleInput')
-  @ApiOperation({ summary: 'Thêm nhiều sản phẩm vào nhà thuốc với mảng mã sản phẩm và số lượng riêng biệt' })
-  @ApiBody({ type: SimpleProductInputDto })
-  async createFromSimpleInput(
-    @Body() simpleInputDto: SimpleProductInputDto,
-    @Request() req
-  ) {
-    const userid = req['user']?.sub;
-    return await this.pharmacyProductService.createFromSimpleInput(simpleInputDto, userid);
   }
 
   @Get('getIdPharmacyProductById:id')
@@ -149,7 +138,7 @@ export class PharmacyProductController {
   @Public()
   @Post('checkUnitDetails')
   @ApiOperation({ summary: 'Kiểm tra chi tiết đơn vị của danh sách sản phẩm' })
-  @ApiBody({ 
+  @ApiBody({
     schema: {
       type: 'object',
       properties: {
@@ -175,6 +164,13 @@ export class PharmacyProductController {
     @Param('machinhanh') machinhanh: string,
     @Param('masanpham') masanpham: string,
     @Body() capNhatTonKho: CapNhatTonKhoDto): Promise<NhaThuoc_SanPham> {
-    return await this.pharmacyProductService.updateTonKho(machinhanh, masanpham, capNhatTonKho);  
+    return await this.pharmacyProductService.updateTonKho(machinhanh, masanpham, capNhatTonKho);
+  }
+
+
+  @Public()
+  @Get('stats/import/:type')
+  async getImportStats(@Param('type') type: 'day' | 'week' | 'month') {
+    return this.pharmacyProductService.getImportStatsByProduct(type);
   }
 }
