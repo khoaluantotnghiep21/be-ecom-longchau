@@ -177,6 +177,7 @@ export class PurchaseOrderService {
             g.thoigiannhan,
             g.nguoinhan,
             g.sodienthoainguoinhan,
+            g.thoigiandukien,
             i.sodienthoai,
             i.diachi,
             d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
@@ -197,7 +198,7 @@ export class PurchaseOrderService {
             JOIN sanpham s ON ct.masanpham = s.masanpham
             JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
             WHERE d.madonhang = :madonhang
-            GROUP BY d.madonhang,d.machinhanh,g.diachinguoinhan,g.thoigiannhan,g.nguoinhan, g.sodienthoainguoinhan,i.hoten, i.sodienthoai, i.diachi, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang
+            GROUP BY d.madonhang,d.machinhanh,g.diachinguoinhan,g.thoigiannhan, g.thoigiandukien , g.nguoinhan, g.sodienthoainguoinhan,i.hoten, i.sodienthoai, i.diachi, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang
             `,
             {
                 replacements: { madonhang },
