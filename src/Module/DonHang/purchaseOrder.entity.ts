@@ -1,4 +1,5 @@
-import { Column, Model, PrimaryKey, Table, DataType } from 'sequelize-typescript';
+import { Column, Model, PrimaryKey, Table, DataType, ForeignKey } from 'sequelize-typescript';
+import { Voucher } from '../Voucher/voucher.entity';
 
 
 @Table({ tableName: 'donhang', timestamps: false })
@@ -7,7 +8,11 @@ export class PurchaseOrder extends Model {
   @Column({ type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   declare id: string;
 
-  @Column
+@Column({
+    type: DataType.STRING,
+    unique: true,
+    allowNull: false,
+  })
   madonhang: string;
 
   @Column
@@ -28,7 +33,11 @@ export class PurchaseOrder extends Model {
   @Column
   phuongthucthanhtoan: string;
 
-  @Column
+  @ForeignKey(() => Voucher)
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   mavoucher: string;
 
   @Column

@@ -7,12 +7,17 @@ import { StatusPurchase } from "src/common/Enum/status-purchase.enum";
 import { OrderDetail } from '../ChiTietDonHang/orderDetail.entity';
 import { OrderDetailsDto } from "./dto/orderDetals.dto";
 import { IdentityUser } from "../IdentityUser/identityuser.entity";
+import { Voucher } from "../Voucher/voucher.entity";
+import { Op } from "sequelize";
 
 @Injectable()
 export class PurchaseOrderService {
     constructor(
         @InjectModel(PurchaseOrder)
         private readonly purchaseOrderRepo: Repository<PurchaseOrder>,
+
+        @InjectModel(Voucher)
+        private readonly voucherRepo: Repository<Voucher>,
         @InjectModel(IdentityUser)
         private readonly userREpo: Repository<IdentityUser>,
         private readonly sequelize: Sequelize,
@@ -154,54 +159,83 @@ export class PurchaseOrderService {
         return results || [];
     }
 
-async getOrderDetailsByMadonhang(madonhang: string): Promise<any> {
-        const order = await this.purchaseOrderRepo.findOne({where: { madonhang }});
+    async getOrderDetailsByMadonhang(madonhang: string): Promise<any> {
+        console.log('Received madonhang:', madonhang);
+        const order = await this.purchaseOrderRepo.findOne({ where: { madonhang } });
         if (!order) {
             throw new NotFoundException(`Order with ID ${madonhang} not found`);
         }
 
         const [results] = await this.sequelize.query(
             `       
-           SELECT 
-            d.madonhang, 
-            i.hoten,
-            d.machinhanh,
-            d.ngaymuahang,
-            g.nguoinhan,
-            i.sodienthoai,
-            i.diachi,
-            d.thanhtien, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang,
-            d.trangthai,
-            json_agg(
-                json_build_object(
-                'tensanpham', s.tensanpham,
-                'donvitinh', ct.donvitinh,
-                'soluong', ct.soluong,
-                'giaban', ct.giaban,
-                'url', a.url
-                )
-            ) AS sanpham
-            FROM identityuser i
-            JOIN donhang d ON i.id = d.userid
-            JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
-            LEFT JOIN giaohang g ON g.madonhang = d.madonhang
-            JOIN sanpham s ON ct.masanpham = s.masanpham
-            JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
-            WHERE d.madonhang = :madonhang
-            GROUP BY d.madonhang,d.machinhanh,g.diachinguoinhan,g.thoigiannhan,g.nguoinhan, g.sodienthoainguoinhan,i.hoten, i.sodienthoai, i.diachi, d.thanhtien, d.trangthai, d.ngaymuahang, d.tongtien, d.giamgiatructiep, d.phivanchuyen, d.phuongthucthanhtoan, d.mavoucher, d.hinhthucnhanhang
-            `,
+      SELECT 
+        d.madonhang, 
+        i.hoten,
+        d.machinhanh,
+        d.ngaymuahang,
+        g.nguoinhan,
+        g.diachinguoinhan,
+        g.thoigiannhan,
+        g.sodienthoainguoinhan,
+        i.sodienthoai,
+        i.diachi,
+        d.thanhtien, 
+        d.tongtien, 
+        d.giamgiatructiep, 
+        d.phivanchuyen, 
+        d.phuongthucthanhtoan, 
+        d.mavoucher, 
+        d.hinhthucnhanhang,
+        d.trangthai,
+        json_agg(
+          json_build_object(
+            'tensanpham', s.tensanpham,
+            'donvitinh', ct.donvitinh,
+            'soluong', ct.soluong,
+            'giaban', ct.giaban,
+            'url', a.url
+          )
+        ) AS sanpham
+      FROM identityuser i
+      JOIN donhang d ON i.id = d.userid
+      JOIN chitietdonhang ct ON d.madonhang = ct.madonhang
+      LEFT JOIN giaohang g ON g.madonhang = d.madonhang
+      JOIN sanpham s ON ct.masanpham = s.masanpham
+      JOIN anhsanpham a ON a.idsanpham = s.id AND a.ismain = true
+      WHERE d.madonhang = :madonhang
+      GROUP BY 
+        d.madonhang, 
+        d.machinhanh, 
+        g.nguoinhan, 
+        g.diachinguoinhan, 
+        g.thoigiannhan, 
+        g.sodienthoainguoinhan, 
+        i.hoten, 
+        i.sodienthoai, 
+        i.diachi, 
+        d.thanhtien, 
+        d.trangthai, 
+        d.ngaymuahang, 
+        d.tongtien, 
+        d.giamgiatructiep, 
+        d.phivanchuyen, 
+        d.phuongthucthanhtoan, 
+        d.mavoucher, 
+        d.hinhthucnhanhang
+      `,
             {
                 replacements: { madonhang },
                 raw: true,
-                plain: false 
+                plain: false,
             }
         );
 
-        return results;
+        console.log('Order details result:', results);
+        return results[0] || {};
     }
 
     async getOrderDetailsByMaChiNhanh(machinhanh: string): Promise<any> {
-        const order = await this.purchaseOrderRepo.findOne({where: { machinhanh }});
+        const order = await this.purchaseOrderRepo.findOne({ where: { machinhanh } });
         if (!order) {
             throw new NotFoundException(`Order with ID ${machinhanh} not found`);
         }
@@ -240,11 +274,35 @@ async getOrderDetailsByMadonhang(madonhang: string): Promise<any> {
             {
                 replacements: { machinhanh },
                 raw: true,
-                plain: false 
+                plain: false
             }
         );
 
         return results;
+    }
+
+    async getOrdersByVoucher(mavoucher: string): Promise<PurchaseOrder[]> {
+        console.log('Received mavoucher:', mavoucher);
+        if (!mavoucher) {
+            throw new NotFoundException('Voucher code is required');
+        }
+
+      
+        const voucher = await this.voucherRepo.findOne({
+            where: { mavoucher: { [Op.iLike]: mavoucher } },
+        });
+        console.log('Voucher found:', voucher?.toJSON() || 'null');
+        if (!voucher) {
+            throw new NotFoundException(`Voucher with code ${mavoucher} not found`);
+        }
+
+     
+        const orders = await this.purchaseOrderRepo.findAll({
+            where: { mavoucher: { [Op.iLike]: mavoucher } },
+        });
+        console.log('Orders found:', orders.map(order => order.toJSON()));
+
+        return orders;
     }
 }
 

@@ -1,13 +1,24 @@
-import { DataTypes } from "sequelize";
-import { Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { Column, Model, Table, DataType } from 'sequelize-typescript';
 
-@Table({tableName: 'voucher', timestamps: false})
-export class Voucher extends Model{
-    @PrimaryKey
-    @Column({ type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 })
+@Table({
+  tableName: 'voucher',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+})
+export class Voucher extends Model<Voucher> {
+    @Column({
+        type: DataType.UUID,
+        defaultValue: DataType.UUIDV4,
+        primaryKey: true,
+    })
     declare id: string;
-    
-    @Column
+
+    @Column({
+        type: DataType.STRING,
+        unique: true,
+        allowNull: false,
+    })
     mavoucher: string;
 
     @Column

@@ -13,7 +13,7 @@ export class VoucherService {
 
     async createVoucher(createVoucherDto: CreateVoucherDto): Promise<Voucher> {
         const data ={...createVoucherDto};
-        return await this.voucherRepo.create(data);
+        return await this.voucherRepo.create(data as any);
     }
 
     async findAll(): Promise<Voucher[]> {
